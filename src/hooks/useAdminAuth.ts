@@ -97,18 +97,38 @@ export function useAdminAuth() {
   const signIn = async (email: string, password: string) => {
     setState(prev => ({ ...prev, isSigningIn: true, error: null }));
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setState(prev => ({ ...prev, isSigningIn: false, error: error.message }));
-      return { error };
+      if (error) {
+        setState(prev => ({ ...prev, isSigningIn: false, error: error.message }));
+        return { error };
+      }
+
+      // Check user role immediately after successful sign-in
+      if (data.user) {
+        const roles = await checkUserRole(data.user.id);
+        if (!roles.isAdmin && !roles.isEditor) {
+          // Sign out if not admin/editor
+          await supabase.auth.signOut();
+          setState(prev => ({ 
+            ...prev, 
+            isSigningIn: false, 
+            error: 'You do not have permission to access the admin area.' 
+          }));
+          return { error: new Error('Unauthorized') };
+        }
+      }
+
+      setState(prev => ({ ...prev, isSigningIn: false }));
+      return { data };
+    } catch (err) {
+      setState(prev => ({ ...prev, isSigningIn: false, error: 'An error occurred during sign in' }));
+      return { error: err };
     }
-
-    setState(prev => ({ ...prev, isSigningIn: false }));
-    return { data };
   };
 
   const signUp = async (email: string, password: string) => {
