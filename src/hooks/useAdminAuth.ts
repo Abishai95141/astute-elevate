@@ -9,9 +9,12 @@ interface AdminAuthState {
   session: Session | null;
   isAdmin: boolean;
   isEditor: boolean;
-  isLoading: boolean;
-  isSigningIn: boolean;
-  error: string | null;
+  isInitializing: boolean;
+}
+
+interface SignInResult {
+  success: boolean;
+  error?: string;
 }
 
 export function useAdminAuth() {
@@ -20,12 +23,10 @@ export function useAdminAuth() {
     session: null,
     isAdmin: false,
     isEditor: false,
-    isLoading: true,
-    isSigningIn: false,
-    error: null,
+    isInitializing: true,
   });
 
-  const checkUserRole = useCallback(async (userId: string) => {
+  const checkUserRole = useCallback(async (userId: string): Promise<{ isAdmin: boolean; isEditor: boolean }> => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -44,59 +45,70 @@ export function useAdminAuth() {
     }
   }, []);
 
+  // Initialize auth state on mount
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
         if (session?.user) {
           const roles = await checkUserRole(session.user.id);
-          setState(prev => ({
-            ...prev,
-            user: session.user,
-            session,
-            isAdmin: roles.isAdmin,
-            isEditor: roles.isEditor,
-            isLoading: false,
-            error: null,
-          }));
+          if (mounted) {
+            setState({
+              user: session.user,
+              session,
+              isAdmin: roles.isAdmin,
+              isEditor: roles.isEditor,
+              isInitializing: false,
+            });
+          }
         } else {
-          setState(prev => ({
-            ...prev,
+          setState(prev => ({ ...prev, isInitializing: false }));
+        }
+      } catch {
+        if (mounted) {
+          setState(prev => ({ ...prev, isInitializing: false }));
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth changes (sign out, token refresh, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT') {
+          setState({
             user: null,
             session: null,
             isAdmin: false,
             isEditor: false,
-            isLoading: false,
-            error: null,
+            isInitializing: false,
+          });
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          // Just update session, don't re-check roles
+          setState(prev => ({
+            ...prev,
+            session,
+            user: session.user,
           }));
         }
       }
     );
 
-    // Then get the initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const roles = await checkUserRole(session.user.id);
-        setState(prev => ({
-          ...prev,
-          user: session.user,
-          session,
-          isAdmin: roles.isAdmin,
-          isEditor: roles.isEditor,
-          isLoading: false,
-          error: null,
-        }));
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [checkUserRole]);
 
-  const signIn = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, isSigningIn: true, error: null }));
-    
+  const signIn = async (email: string, password: string): Promise<SignInResult> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -104,81 +116,51 @@ export function useAdminAuth() {
       });
 
       if (error) {
-        setState(prev => ({ ...prev, isSigningIn: false, error: error.message }));
-        return { error };
+        return { success: false, error: error.message };
       }
 
-      // Check user role immediately after successful sign-in
-      if (data.user) {
-        const roles = await checkUserRole(data.user.id);
-        if (!roles.isAdmin && !roles.isEditor) {
-          // Sign out if not admin/editor
-          await supabase.auth.signOut();
-          setState(prev => ({ 
-            ...prev, 
-            isSigningIn: false, 
-            error: 'You do not have permission to access the admin area.' 
-          }));
-          return { error: new Error('Unauthorized') };
-        }
-        
-        // Set user and roles immediately to avoid race condition
-        setState(prev => ({ 
-          ...prev, 
-          isSigningIn: false,
-          user: data.user,
-          session: data.session,
-          isAdmin: roles.isAdmin,
-          isEditor: roles.isEditor,
-        }));
-        return { data, roles };
+      if (!data.user) {
+        return { success: false, error: 'Sign in failed' };
       }
 
-      setState(prev => ({ ...prev, isSigningIn: false }));
-      return { data };
-    } catch (err) {
-      setState(prev => ({ ...prev, isSigningIn: false, error: 'An error occurred during sign in' }));
-      return { error: err };
+      // Check roles immediately
+      const roles = await checkUserRole(data.user.id);
+
+      if (!roles.isAdmin && !roles.isEditor) {
+        // Sign out if not authorized
+        await supabase.auth.signOut();
+        return { success: false, error: 'You do not have permission to access the admin area.' };
+      }
+
+      // Update state with user and roles
+      setState({
+        user: data.user,
+        session: data.session,
+        isAdmin: roles.isAdmin,
+        isEditor: roles.isEditor,
+        isInitializing: false,
+      });
+
+      return { success: true };
+    } catch {
+      return { success: false, error: 'An error occurred during sign in' };
     }
-  };
-
-  const signUp = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    });
-
-    if (error) {
-      setState(prev => ({ ...prev, isLoading: false, error: error.message }));
-      return { error };
-    }
-
-    setState(prev => ({ ...prev, isLoading: false }));
-    return { data };
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setState(prev => ({
-      ...prev,
+    setState({
       user: null,
       session: null,
       isAdmin: false,
       isEditor: false,
-      isLoading: false,
-      error: null,
-    }));
+      isInitializing: false,
+    });
   };
 
   return {
     ...state,
     signIn,
-    signUp,
     signOut,
   };
 }

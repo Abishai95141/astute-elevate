@@ -18,20 +18,20 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, isAdmin, isEditor, isLoading, signOut } = useAdminAuth();
+  const { user, isAdmin, isEditor, isInitializing, signOut } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isInitializing && !user) {
       navigate('/admin/login');
-    } else if (!isLoading && user && !isAdmin && !isEditor) {
+    } else if (!isInitializing && user && !isAdmin && !isEditor) {
       navigate('/admin/login?error=unauthorized');
     }
-  }, [user, isAdmin, isEditor, isLoading, navigate]);
+  }, [user, isAdmin, isEditor, isInitializing, navigate]);
 
-  if (isLoading) {
+  if (isInitializing) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
