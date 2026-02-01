@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const projects = [
   {
@@ -130,6 +130,13 @@ export function Portfolio() {
 
   const x = useTransform(scrollYProgress, [0, 1], ['0%', '-50%']);
 
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -400 : 400;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section
       id="portfolio"
@@ -157,23 +164,53 @@ export function Portfolio() {
               Case Studies
             </motion.h2>
           </div>
-          <motion.p
+
+          {/* Navigation Arrows */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-muted-foreground max-w-md"
+            className="flex items-center gap-3"
           >
-            Real results from real projects. See how we've helped businesses transform.
-          </motion.p>
+            <motion.button
+              onClick={() => scrollCarousel('left')}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
+            >
+              <ChevronLeft size={20} />
+            </motion.button>
+            
+            {/* Animated connecting line */}
+            <div className="relative w-8 h-px">
+              <div className="absolute inset-0 bg-border/50" />
+              <motion.div
+                className="absolute inset-0 bg-foreground/50"
+                animate={{ scaleX: [0, 1, 0], originX: ['0%', '0%', '100%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </div>
+            
+            <motion.button
+              onClick={() => scrollCarousel('right')}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ x: [0, 3, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
+            >
+              <ChevronRight size={20} />
+            </motion.button>
+          </motion.div>
         </div>
       </div>
 
       {/* Horizontal Scroll Gallery */}
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <motion.div
           ref={scrollRef}
           style={{ x }}
-          className="flex gap-6 pl-4 sm:pl-8 lg:pl-16"
+          className="flex gap-6 pl-4 sm:pl-8 lg:pl-16 overflow-x-auto scrollbar-hide"
         >
           {projects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
