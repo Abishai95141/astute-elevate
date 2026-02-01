@@ -1,195 +1,119 @@
 
 
-# Comprehensive UI Enhancements Plan
+# Restore Normal Cursor and Add Scroll Snapping
 
-This plan addresses the formatting issues, adds parallax effects, implements a custom animated cursor, and creates a scroll stack effect for the Services section.
-
----
-
-## 1. Portfolio/Case Studies Section - Fix Card Formatting
-
-Based on the screenshot, the portfolio cards appear cut off on the edges and the layout needs adjustment.
-
-### Issues Identified:
-- Cards are being clipped at the viewport edges
-- The horizontal scroll container needs proper padding on both ends
-- Cards need consistent sizing and proper visibility
-
-### Solution:
-- Add right padding to the scroll container to show partial next card
-- Ensure first and last cards have proper margins
-- Add a subtle gradient mask at edges to indicate more content
-- Fix the `overflow-x-auto` conflict with the motion transform
-
-### Code Changes (`Portfolio.tsx`):
-- Remove the conflicting `style={{ x }}` motion transform that fights with manual scrolling
-- Add `px-4 sm:px-8 lg:px-16` padding on both sides of the scroll container
-- Add gradient fade masks on left/right edges to indicate scrollability
-- Ensure card min-width for proper sizing
+This plan covers removing the custom animated cursor and implementing smooth scroll snapping between sections for a premium navigation experience.
 
 ---
 
-## 2. About Section - Fix Quote Alignment
+## 1. Remove Custom Cursor
 
-Based on the screenshot, the mission statement quote text is being cut off horizontally.
+### Changes Required:
 
-### Issues Identified:
-- The typewriter text may overflow its container
-- Quote marks need proper positioning
-- Text needs to wrap correctly and center properly
+**Remove CustomCursor component from Index.tsx:**
+- Remove the `<CustomCursor />` component from the page
+- Remove the import statement for CustomCursor
 
-### Solution:
-- Ensure the quote container has proper `text-center` and `whitespace-normal`
-- Fix the TypewriterText component to handle text wrapping better
-- Add proper block-level layout for the quote marks
-- Use `inline-block` or proper flexbox centering
-
-### Code Changes (`About.tsx`):
-- Restructure the quote section with proper centering
-- Make quote marks separate elements for proper alignment
-- Ensure the text wraps naturally within the max-width container
+**Delete or leave the CustomCursor.tsx file:**
+- The file can remain in the codebase (unused) or be deleted
+- I'll simply remove it from rendering
 
 ---
 
-## 3. Sector Problems Section - Add Parallax Effects
+## 2. Add Smooth Scroll Snapping
 
-Add scroll-linked parallax movement to the sector cards for enhanced depth perception.
+Scroll snapping creates a "magnetic" effect where the viewport snaps to section boundaries when scrolling pauses, providing a polished, premium feel.
 
-### Implementation:
-- Use `useScroll` with `useTransform` from Framer Motion
-- Each card will have a slight vertical offset based on scroll position
-- Stagger the parallax intensity per card for a layered effect
-- Add subtle scale transformation as cards enter viewport
+### Implementation Strategy:
 
-### Code Changes (`SectorProblems.tsx`):
-- Import `useScroll`, `useTransform` from framer-motion
-- Wrap each SectorCard in a parallax container
-- Apply different parallax offsets (e.g., odd cards move up, even cards move down)
-- Add subtle rotation on scroll for depth
+**Update src/index.css:**
+- Add `scroll-snap-type: y mandatory` to the html element for vertical snap scrolling
+- Use `mandatory` for a stronger snap effect (user must commit to scroll direction)
 
----
+**Update each section component:**
+Each major section needs `scroll-snap-align: start` to define snap points:
 
-## 4. Custom Animated Cursor
+| Section | File | Snap Configuration |
+|---------|------|-------------------|
+| Hero | Hero.tsx | `scroll-snap-align: start` |
+| Services | Services.tsx | `scroll-snap-align: start` |
+| Portfolio | Portfolio.tsx | `scroll-snap-align: start` |
+| About | About.tsx | `scroll-snap-align: start` |
+| Sector Problems | SectorProblems.tsx | `scroll-snap-align: start` |
+| Contact | Contact.tsx | `scroll-snap-align: start` |
+| Footer | Footer.tsx | `scroll-snap-align: start` |
 
-Create a custom cursor component that:
-- Follows the mouse with smooth spring animation
-- Has a subtle glow effect
-- Changes size/shape when hovering over interactive elements
-- Uses a ring + dot design for the tech-noir aesthetic
+### CSS Implementation:
 
-### New Component: `CustomCursor.tsx`
+```css
+/* In src/index.css */
+html {
+  scroll-snap-type: y proximity; /* 'proximity' is gentler than 'mandatory' */
+  scroll-behavior: smooth;
+}
 
-```text
-+---------------------------+
-|  Main Cursor Elements:    |
-|  - Outer ring (30px)      |
-|  - Inner dot (8px)        |
-|  - Glow effect on hover   |
-+---------------------------+
-
-States:
-- Default: Small dot + thin ring
-- Hover (links/buttons): Ring expands, dot shrinks
-- Click: Both scale down briefly
-- Text hover: Cursor becomes text cursor shape
+/* Utility class for snap sections */
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
 ```
 
-### Implementation:
-- Use `useMotionValue` and `useSpring` for smooth following
-- Track hover state on interactive elements using data attributes or event delegation
-- Hide default cursor with CSS `cursor: none`
-- Add the component to Index.tsx at the root level
+### Mobile Considerations:
+- Scroll snapping works well on both desktop and mobile
+- The `proximity` option ensures the snap only activates when close to a section boundary (less aggressive than `mandatory`)
 
 ---
 
-## 5. Services Section - Scroll Stack Effect
+## Files to Modify
 
-Implement a sticky scroll stack (parallax) effect where service cards appear to stack on top of each other as you scroll, similar to the ReactBits/Shadcn reference.
+| File | Changes |
+|------|---------|
+| `src/pages/Index.tsx` | Remove CustomCursor import and component |
+| `src/index.css` | Add scroll-snap-type to html, create snap-section utility |
+| `src/components/Hero.tsx` | Add snap-section class to section element |
+| `src/components/Services.tsx` | Add snap-section class to section element |
+| `src/components/Portfolio.tsx` | Add snap-section class to section element |
+| `src/components/About.tsx` | Add snap-section class to section element |
+| `src/components/SectorProblems.tsx` | Add snap-section class to section element |
+| `src/components/Contact.tsx` | Add snap-section class to section element |
+| `src/components/Footer.tsx` | Add snap-section class to footer element |
 
-### Concept:
-As the user scrolls through the services section:
-1. Each service card becomes sticky at the top
-2. The next card scrolls up and stacks on top
-3. Previous cards scale down slightly and fade
-4. Creates a "deck of cards" feel
+---
 
-### Implementation Approach:
+## Visual Behavior After Changes
 
 ```text
-Scroll Stack Layout:
-+--------------------------------+
-|  [Card 1] <- sticky, top: 80px |
-|  [Card 2] <- sticky, top: 90px |
-|  [Card 3] <- sticky, top:100px |
-|  [Card 4] <- sticky, top:110px |
-+--------------------------------+
+Scroll Behavior:
++------------------+
+|      HERO        | <- snap point (start)
+|                  |
++------------------+
+      ↓ scroll
++------------------+
+|    SERVICES      | <- snap point (start)
+|                  |
++------------------+
+      ↓ scroll
++------------------+
+|    PORTFOLIO     | <- snap point (start)
+|                  |
++------------------+
+      ...etc
 
-Each card:
-- position: sticky
-- Staggered top offset (10px apart)
-- Scale reduces as more cards stack
-- Opacity reduces for older cards
-- Shadow increases for depth
-```
-
-### Code Changes (`Services.tsx`):
-- Change from CSS Grid to vertical stack layout
-- Each card uses `position: sticky` with calculated `top` offset
-- Use `useScroll` with card-specific `target` for individual progress
-- Transform scale: 1 to 0.95 as cards get covered
-- Increase section height to allow scroll-through
-
----
-
-## Technical Implementation Details
-
-### Files to Create:
-1. `src/components/CustomCursor.tsx` - New animated cursor component
-
-### Files to Modify:
-1. `src/components/Portfolio.tsx` - Fix card layout and add edge masks
-2. `src/components/About.tsx` - Fix quote alignment
-3. `src/components/SectorProblems.tsx` - Add parallax to cards
-4. `src/components/Services.tsx` - Implement scroll stack effect
-5. `src/pages/Index.tsx` - Add CustomCursor component
-6. `src/index.css` - Add cursor-none utility and any needed styles
-
----
-
-## Visual Summary
-
-```text
-Page Flow After Changes:
-+----------------------------------------+
-|              HERO                       |
-+----------------------------------------+
-|            SERVICES                     |
-|   [Scroll Stack - cards overlay]        |
-+----------------------------------------+
-|            PORTFOLIO                    |
-|   [Fixed horizontal scroll layout]      |
-|   <-[fade mask]  [cards]  [fade mask]-> |
-+----------------------------------------+
-|              ABOUT                      |
-|   "Quote properly centered"             |
-+----------------------------------------+
-|         SECTOR PROBLEMS                 |
-|   [Cards with parallax movement]        |
-+----------------------------------------+
-|             CONTACT                     |
-+----------------------------------------+
-|              FOOTER                     |
-+----------------------------------------+
-
-+ Custom Cursor overlay (follows mouse)
+When user scrolls:
+1. Page scrolls normally
+2. When scroll pauses near a section boundary
+3. Page smoothly snaps to the nearest section start
+4. Creates a "presentation slide" feel
 ```
 
 ---
 
-## Responsive Considerations
+## Technical Notes
 
-- **Custom Cursor**: Only enabled on desktop (hidden on touch devices)
-- **Scroll Stack**: Falls back to regular grid on mobile for performance
-- **Parallax**: Reduced motion respects `prefers-reduced-motion`
-- **Portfolio**: Touch-friendly swipe on mobile, arrows on desktop
+- Using `proximity` instead of `mandatory` for a less jarring experience
+- Each section maintains its existing min-height
+- Smooth scroll behavior is already set in index.css
+- Normal cursor will be restored (system default)
 
