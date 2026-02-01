@@ -12,8 +12,7 @@ import { useEffect } from 'react';
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-  const { user, isAdmin, isEditor, isLoading, error, signIn, signUp } = useAdminAuth();
+  const { user, isAdmin, isEditor, isLoading, error, signIn } = useAdminAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -41,14 +40,7 @@ export default function AdminLogin() {
       return;
     }
 
-    if (isSignUp) {
-      const result = await signUp(email, password);
-      if (!result.error) {
-        setLocalError('Account created! Please check your email to verify, then contact an admin to grant you access.');
-      }
-    } else {
-      await signIn(email, password);
-    }
+    await signIn(email, password);
   };
 
   return (
@@ -57,7 +49,7 @@ export default function AdminLogin() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Astute CMS</CardTitle>
           <CardDescription>
-            {isSignUp ? 'Create an account' : 'Sign in to manage content'}
+            Sign in to manage content
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,26 +89,12 @@ export default function AdminLogin() {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  {isSignUp ? 'Creating account...' : 'Signing in...'}
+                  Signing in...
                 </>
-              ) : isSignUp ? (
-                'Create Account'
               ) : (
                 'Sign In'
               )}
             </Button>
-
-            <div className="text-center text-sm">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-primary hover:underline"
-              >
-                {isSignUp
-                  ? 'Already have an account? Sign in'
-                  : "Need an account? Sign up"}
-              </button>
-            </div>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border">
