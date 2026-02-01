@@ -1,192 +1,117 @@
 
-# Fix Rich Text Formatting and Admin Login
+# Fix Case Study Text Colors (Not Showing White)
 
-## Overview
+## Problem
 
-There are two issues to fix:
-1. **Rich text formatting** from CMS not displaying properly on the website
-2. **Sign-in failing** with "An error occurred during sign in"
+The rich text content on case study pages displays with dark/muted colors instead of white text. Looking at the screenshot:
+- Headings appear in a dark color (nearly invisible)
+- Body text is gray instead of white
+- The formatting structure works, but colors are wrong
+
+## Root Cause
+
+The site uses Tailwind's class-based dark mode (`darkMode: ["class"]`), but the `<html>` element doesn't have the `dark` class applied. 
+
+The case study page uses:
+```tsx
+className="prose prose-lg dark:prose-invert"
+```
+
+The `prose-invert` class (which makes text white for dark backgrounds) only activates when `dark:` variant is triggered - but since there's no `.dark` class on the HTML element, it never activates.
+
+The CSS defines dark colors in `:root` by default:
+```css
+:root {
+  --background: 0 0% 4%;    /* Dark background */
+  --foreground: 0 0% 98%;   /* Light text */
+}
+```
+
+But Tailwind Typography doesn't know about these custom CSS variables - it uses its own color system.
+
+## Solution
+
+Two options to fix this:
+
+### Option A: Add `dark` class to HTML (Simple)
+Add `class="dark"` to the `<html>` element so `dark:prose-invert` activates.
+
+### Option B: Use `prose-invert` directly (Most Reliable)
+Since the site is always dark, remove the `dark:` prefix and just use `prose-invert` directly. This ensures it always applies regardless of the class system.
+
+**I recommend Option B** as it's simpler and doesn't require coordinating between index.html and component classes.
 
 ---
 
-## Issue 1: Rich Text Formatting Not Showing
+## Implementation
 
-### Problem
+### File: `src/pages/CaseStudy.tsx`
 
-The case study page uses Tailwind's `prose` classes for styling rich text content:
-
+Change line 130 from:
 ```tsx
 className="max-w-3xl mx-auto prose prose-lg dark:prose-invert"
 ```
 
-However, these classes require the **@tailwindcss/typography plugin** to be registered in the Tailwind config. While the package is installed as a dev dependency, it's not added to the plugins array.
-
-### Solution
-
-Add the typography plugin to `tailwind.config.ts`:
-
-```typescript
-plugins: [
-  require("tailwindcss-animate"),
-  require("@tailwindcss/typography"),  // Add this
-],
+To:
+```tsx
+className="max-w-3xl mx-auto prose prose-lg prose-invert"
 ```
 
-### Files to Modify
+Additionally, customize prose colors to match the monochromatic theme by adding prose color modifiers:
 
-| File | Change |
-|------|--------|
-| `tailwind.config.ts` | Add typography plugin to plugins array |
+```tsx
+className="max-w-3xl mx-auto prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-foreground"
+```
+
+This ensures:
+- Headings are white (`text-foreground` = 98% white)
+- Body text is readable gray (`text-muted-foreground` = 60% gray - or we can make it lighter)
+- Bold text stands out
+- Links are visible
 
 ---
 
-## Issue 2: Sign-In Not Working
+## Alternative: CSS-based Customization
 
-### Problem Analysis
+For more control, add typography customization to `src/index.css`:
 
-From the auth logs:
-- Authentication itself succeeds (status 200, user logged in)
-- User has `admin` role in `user_roles` table
-- But sign-in still fails with generic error
-
-The issue is in the `signIn` function's catch block - it catches all errors silently and returns a generic message. The actual error could be:
-1. Network issue when checking roles
-2. The role check returning empty data (treated as no roles)
-3. Some other runtime error
-
-### Current Code Problem
-
-```typescript
-const signIn = async (email: string, password: string): Promise<SignInResult> => {
-  try {
-    // ... auth code
-  } catch {
-    // This catches ALL errors without logging
-    return { success: false, error: 'An error occurred during sign in' };
+```css
+@layer components {
+  /* Custom prose colors for dark theme */
+  .prose-custom {
+    --tw-prose-body: hsl(0 0% 75%);
+    --tw-prose-headings: hsl(0 0% 98%);
+    --tw-prose-lead: hsl(0 0% 70%);
+    --tw-prose-links: hsl(0 0% 98%);
+    --tw-prose-bold: hsl(0 0% 98%);
+    --tw-prose-counters: hsl(0 0% 60%);
+    --tw-prose-bullets: hsl(0 0% 50%);
+    --tw-prose-hr: hsl(0 0% 25%);
+    --tw-prose-quotes: hsl(0 0% 80%);
+    --tw-prose-quote-borders: hsl(0 0% 30%);
+    --tw-prose-captions: hsl(0 0% 60%);
+    --tw-prose-code: hsl(0 0% 98%);
+    --tw-prose-pre-code: hsl(0 0% 75%);
+    --tw-prose-pre-bg: hsl(0 0% 10%);
+    --tw-prose-th-borders: hsl(0 0% 30%);
+    --tw-prose-td-borders: hsl(0 0% 20%);
   }
-};
+}
 ```
 
-### Solution
-
-1. Add proper error logging to the catch block
-2. Add more defensive checks in the role verification
-3. Ensure `isSubmitting` state is reset properly on all error paths
-
-### Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/hooks/useAdminAuth.ts` | Add console.error for debugging, improve error handling |
-| `src/pages/admin/AdminLogin.tsx` | Ensure `isSubmitting` is always reset on errors |
+Then use: `prose prose-lg prose-custom`
 
 ---
 
-## Technical Implementation
+## Files to Modify
 
-### 1. tailwind.config.ts
-
-```typescript
-plugins: [
-  require("tailwindcss-animate"),
-  require("@tailwindcss/typography"),
-],
-```
-
-### 2. useAdminAuth.ts - Improved Error Handling
-
-```typescript
-const signIn = async (email: string, password: string): Promise<SignInResult> => {
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      console.error('Auth error:', error);
-      return { success: false, error: error.message };
-    }
-
-    if (!data.user) {
-      return { success: false, error: 'Sign in failed - no user returned' };
-    }
-
-    // Check roles with better error handling
-    let roles: { isAdmin: boolean; isEditor: boolean };
-    try {
-      roles = await checkUserRole(data.user.id);
-    } catch (roleError) {
-      console.error('Role check error:', roleError);
-      // Sign out since we can't verify permissions
-      await supabase.auth.signOut();
-      return { success: false, error: 'Unable to verify permissions. Please try again.' };
-    }
-
-    if (!roles.isAdmin && !roles.isEditor) {
-      await supabase.auth.signOut();
-      return { success: false, error: 'You do not have permission to access the admin area.' };
-    }
-
-    // Update state
-    setState({
-      user: data.user,
-      session: data.session,
-      isAdmin: roles.isAdmin,
-      isEditor: roles.isEditor,
-      isInitializing: false,
-    });
-
-    return { success: true };
-  } catch (err) {
-    console.error('Sign in error:', err);
-    return { success: false, error: 'An unexpected error occurred. Please try again.' };
-  }
-};
-```
-
-### 3. AdminLogin.tsx - Ensure isSubmitting Reset
-
-The current code doesn't reset `isSubmitting` in all paths. Add a finally block or ensure reset on all error paths:
-
-```typescript
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-
-  if (!email || !password) {
-    setError('Please enter email and password');
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    const result = await signIn(email, password);
-
-    if (result.success) {
-      navigate('/admin', { replace: true });
-    } else {
-      setError(result.error || 'Sign in failed');
-    }
-  } catch {
-    setError('An unexpected error occurred');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-```
+| File | Change |
+|------|--------|
+| `src/pages/CaseStudy.tsx` | Change `dark:prose-invert` to `prose-invert` and add color modifiers |
+| `src/index.css` (optional) | Add custom `.prose-custom` class for precise color control |
 
 ---
 
 ## Summary
 
-| Issue | Root Cause | Fix |
-|-------|------------|-----|
-| Rich text formatting | Typography plugin not registered | Add `require("@tailwindcss/typography")` to plugins |
-| Sign-in error | Silent error catching, no debugging info | Add error logging and improve error messages |
-
-After these changes:
-- Bold text, headings, lists, and other formatting will display correctly on case study pages
-- Sign-in errors will be logged to console for debugging
-- Error messages will be more helpful to identify the actual issue
+The fix is simple: since the site is always dark-themed, use `prose-invert` directly instead of `dark:prose-invert`. This will immediately make all text visible with proper light-on-dark colors.
