@@ -64,7 +64,7 @@ export function About() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section id="about" className="section-padding relative overflow-hidden">
+    <section id="about" className="snap-section section-padding relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
 

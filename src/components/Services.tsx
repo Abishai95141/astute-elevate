@@ -203,7 +203,7 @@ export function Services() {
   const isMobile = useIsMobile();
 
   return (
-    <section id="services" className="relative overflow-hidden">
+    <section id="services" className="snap-section relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 grid-pattern opacity-30" />
 

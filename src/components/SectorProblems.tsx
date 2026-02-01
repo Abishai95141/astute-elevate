@@ -202,7 +202,7 @@ export function SectorProblems() {
   });
 
   return (
-    <section id="sectors" className="section-padding relative overflow-hidden">
+    <section id="sectors" className="snap-section section-padding relative overflow-hidden">
       {/* Animated Grid Background */}
       <div className="absolute inset-0 grid-pattern opacity-10" />
       
