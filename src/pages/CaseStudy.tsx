@@ -59,6 +59,21 @@ export default function CaseStudy() {
       <div className="min-h-screen bg-background">
         <Navbar />
 
+        {/* Fixed Back Button */}
+        <div className="fixed top-24 left-4 z-40 md:left-8">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="backdrop-blur-sm bg-background/80 border-border/50 shadow-lg"
+          >
+            <Link to="/#portfolio">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Link>
+          </Button>
+        </div>
+
         <main>
           {/* Hero Section */}
           <section className="relative min-h-[60vh] flex items-end">
