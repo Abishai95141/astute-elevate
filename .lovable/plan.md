@@ -1,150 +1,195 @@
 
 
-# UI Refinements & Sector Problems Section
+# Comprehensive UI Enhancements Plan
 
-This plan covers the requested changes to improve the landing page layout and add a new "Sector Problems" section with premium aesthetics.
-
----
-
-## Changes Overview
-
-### 1. Hero Section - Scroll Indicator Repositioning
-Move the scroll indicator to the absolute bottom of the viewport screen, outside of the main content div so it stays fixed at the bottom regardless of content size.
-
-**Current Issue:** The scroll indicator is inside the content container with `absolute bottom-8`, making it relative to the content area rather than the full viewport.
-
-**Fix:** 
-- Move the scroll indicator outside of the `motion.div` content wrapper
-- Position it relative to the section itself using fixed bottom positioning
-- Ensure it remains visible at the very bottom of the hero viewport
+This plan addresses the formatting issues, adds parallax effects, implements a custom animated cursor, and creates a scroll stack effect for the Services section.
 
 ---
 
-### 2. Portfolio Section - Header & Navigation Arrows
+## 1. Portfolio/Case Studies Section - Fix Card Formatting
 
-**Remove subtitle text:**
-- Delete the paragraph "Real results from real projects. See how we've helped businesses transform."
+Based on the screenshot, the portfolio cards appear cut off on the edges and the layout needs adjustment.
 
-**Add aesthetic navigation arrows:**
-- Create left/right arrow buttons with animated hover effects
-- Position them elegantly (either beside the header or below the carousel)
-- Add smooth pulsing/bouncing animation to indicate scrollability
-- Implement click handlers to scroll the carousel horizontally
+### Issues Identified:
+- Cards are being clipped at the viewport edges
+- The horizontal scroll container needs proper padding on both ends
+- Cards need consistent sizing and proper visibility
 
-**Arrow Design:**
-- Minimal circular buttons with chevron icons
-- Subtle glow effect on hover
-- Connected by a thin animated line
+### Solution:
+- Add right padding to the scroll container to show partial next card
+- Ensure first and last cards have proper margins
+- Add a subtle gradient mask at edges to indicate more content
+- Fix the `overflow-x-auto` conflict with the motion transform
 
----
-
-### 3. About Section - Quote Formatting Fix
-
-**Issue:** The typewriter text may have word wrapping issues causing the quote to appear misaligned.
-
-**Fix:**
-- Wrap the quote text properly with correct container styling
-- Ensure the quotation marks are positioned correctly
-- Add proper text centering and line-height adjustments
+### Code Changes (`Portfolio.tsx`):
+- Remove the conflicting `style={{ x }}` motion transform that fights with manual scrolling
+- Add `px-4 sm:px-8 lg:px-16` padding on both sides of the scroll container
+- Add gradient fade masks on left/right edges to indicate scrollability
+- Ensure card min-width for proper sizing
 
 ---
 
-### 4. About Section - Complete Refactor
+## 2. About Section - Fix Quote Alignment
 
-**Remove:**
-- "Our Journey" timeline section entirely
-- Timeline data array
+Based on the screenshot, the mission statement quote text is being cut off horizontally.
 
-**Keep:**
-- Header section with "We Build Digital Excellence"
-- Mission statement with typewriter effect (with fixed formatting)
-- Values grid (4 cards)
+### Issues Identified:
+- The typewriter text may overflow its container
+- Quote marks need proper positioning
+- Text needs to wrap correctly and center properly
 
-**Enhance:**
-- More minimal, cleaner layout
-- Better spacing and visual hierarchy
-- Refined animations
+### Solution:
+- Ensure the quote container has proper `text-center` and `whitespace-normal`
+- Fix the TypewriterText component to handle text wrapping better
+- Add proper block-level layout for the quote marks
+- Use `inline-block` or proper flexbox centering
 
----
-
-### 5. NEW: Sector Problems Section
-
-Create a visually striking section showcasing industry sectors and the problems Astute Computer solves.
-
-**Design Concept:**
-A grid-based layout with animated cards representing different industry sectors and their common challenges.
-
-**Sectors to Include:**
-| Sector | Problem Focus |
-|--------|--------------|
-| Healthcare | Legacy systems, paper records, compliance |
-| Legal | Document chaos, slow retrieval, security |
-| Manufacturing | Outdated processes, manual tracking |
-| Finance | Data silos, reporting delays, compliance |
-| Retail | Inventory chaos, disconnected channels |
-| Education | Administrative burden, outdated platforms |
-
-**Visual Features:**
-- Asymmetric bento-grid layout
-- Each card has a subtle animated icon
-- Hover reveals the solution approach
-- Animated connecting lines between cards
-- Background with subtle animated grid pattern
-
-**Animations:**
-- Staggered card entrance on scroll
-- Cards have subtle floating/breathing animation
-- Hover state: card lifts with glow effect
-- Icons animate on hover (subtle pulse)
+### Code Changes (`About.tsx`):
+- Restructure the quote section with proper centering
+- Make quote marks separate elements for proper alignment
+- Ensure the text wraps naturally within the max-width container
 
 ---
 
-## Technical Implementation
+## 3. Sector Problems Section - Add Parallax Effects
+
+Add scroll-linked parallax movement to the sector cards for enhanced depth perception.
+
+### Implementation:
+- Use `useScroll` with `useTransform` from Framer Motion
+- Each card will have a slight vertical offset based on scroll position
+- Stagger the parallax intensity per card for a layered effect
+- Add subtle scale transformation as cards enter viewport
+
+### Code Changes (`SectorProblems.tsx`):
+- Import `useScroll`, `useTransform` from framer-motion
+- Wrap each SectorCard in a parallax container
+- Apply different parallax offsets (e.g., odd cards move up, even cards move down)
+- Add subtle rotation on scroll for depth
+
+---
+
+## 4. Custom Animated Cursor
+
+Create a custom cursor component that:
+- Follows the mouse with smooth spring animation
+- Has a subtle glow effect
+- Changes size/shape when hovering over interactive elements
+- Uses a ring + dot design for the tech-noir aesthetic
+
+### New Component: `CustomCursor.tsx`
+
+```text
++---------------------------+
+|  Main Cursor Elements:    |
+|  - Outer ring (30px)      |
+|  - Inner dot (8px)        |
+|  - Glow effect on hover   |
++---------------------------+
+
+States:
+- Default: Small dot + thin ring
+- Hover (links/buttons): Ring expands, dot shrinks
+- Click: Both scale down briefly
+- Text hover: Cursor becomes text cursor shape
+```
+
+### Implementation:
+- Use `useMotionValue` and `useSpring` for smooth following
+- Track hover state on interactive elements using data attributes or event delegation
+- Hide default cursor with CSS `cursor: none`
+- Add the component to Index.tsx at the root level
+
+---
+
+## 5. Services Section - Scroll Stack Effect
+
+Implement a sticky scroll stack (parallax) effect where service cards appear to stack on top of each other as you scroll, similar to the ReactBits/Shadcn reference.
+
+### Concept:
+As the user scrolls through the services section:
+1. Each service card becomes sticky at the top
+2. The next card scrolls up and stacks on top
+3. Previous cards scale down slightly and fade
+4. Creates a "deck of cards" feel
+
+### Implementation Approach:
+
+```text
+Scroll Stack Layout:
++--------------------------------+
+|  [Card 1] <- sticky, top: 80px |
+|  [Card 2] <- sticky, top: 90px |
+|  [Card 3] <- sticky, top:100px |
+|  [Card 4] <- sticky, top:110px |
++--------------------------------+
+
+Each card:
+- position: sticky
+- Staggered top offset (10px apart)
+- Scale reduces as more cards stack
+- Opacity reduces for older cards
+- Shadow increases for depth
+```
+
+### Code Changes (`Services.tsx`):
+- Change from CSS Grid to vertical stack layout
+- Each card uses `position: sticky` with calculated `top` offset
+- Use `useScroll` with card-specific `target` for individual progress
+- Transform scale: 1 to 0.95 as cards get covered
+- Increase section height to allow scroll-through
+
+---
+
+## Technical Implementation Details
+
+### Files to Create:
+1. `src/components/CustomCursor.tsx` - New animated cursor component
 
 ### Files to Modify:
-1. `src/components/Hero.tsx` - Reposition scroll indicator
-2. `src/components/Portfolio.tsx` - Remove subtitle, add navigation arrows
-3. `src/components/About.tsx` - Fix quote, remove timeline, enhance aesthetics
-4. `src/pages/Index.tsx` - Add SectorProblems component
-
-### New Files:
-1. `src/components/SectorProblems.tsx` - New section component
+1. `src/components/Portfolio.tsx` - Fix card layout and add edge masks
+2. `src/components/About.tsx` - Fix quote alignment
+3. `src/components/SectorProblems.tsx` - Add parallax to cards
+4. `src/components/Services.tsx` - Implement scroll stack effect
+5. `src/pages/Index.tsx` - Add CustomCursor component
+6. `src/index.css` - Add cursor-none utility and any needed styles
 
 ---
 
-## Section Structure After Changes
+## Visual Summary
 
 ```text
-+------------------+
-|      Hero        |  <- Scroll indicator at absolute bottom
-+------------------+
-|     Services     |
-+------------------+
-|    Portfolio     |  <- No subtitle, aesthetic arrow navigation
-+------------------+
-|      About       |  <- Cleaner, no timeline
-+------------------+
-| Sector Problems  |  <- NEW: Bento grid with industry focus
-+------------------+
-|     Contact      |
-+------------------+
-|      Footer      |
-+------------------+
+Page Flow After Changes:
++----------------------------------------+
+|              HERO                       |
++----------------------------------------+
+|            SERVICES                     |
+|   [Scroll Stack - cards overlay]        |
++----------------------------------------+
+|            PORTFOLIO                    |
+|   [Fixed horizontal scroll layout]      |
+|   <-[fade mask]  [cards]  [fade mask]-> |
++----------------------------------------+
+|              ABOUT                      |
+|   "Quote properly centered"             |
++----------------------------------------+
+|         SECTOR PROBLEMS                 |
+|   [Cards with parallax movement]        |
++----------------------------------------+
+|             CONTACT                     |
++----------------------------------------+
+|              FOOTER                     |
++----------------------------------------+
+
++ Custom Cursor overlay (follows mouse)
 ```
 
 ---
 
-## Sector Problems Grid Layout
+## Responsive Considerations
 
-```text
-+----------------+--------+--------+
-|   Healthcare   |  Legal | Manu-  |
-|   (large)      |        | fact.  |
-+----------------+--------+--------+
-| Finance | Retail  |  Education   |
-|         |         |   (large)    |
-+---------+---------+--------------+
-```
-
-The bento grid will use varying card sizes for visual interest, with larger cards for primary sectors.
+- **Custom Cursor**: Only enabled on desktop (hidden on touch devices)
+- **Scroll Stack**: Falls back to regular grid on mobile for performance
+- **Parallax**: Reduced motion respects `prefers-reduced-motion`
+- **Portfolio**: Touch-friendly swipe on mobile, arrows on desktop
 
