@@ -127,7 +127,7 @@ export default function CaseStudy() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-3xl mx-auto prose prose-lg dark:prose-invert"
+              className="max-w-3xl mx-auto prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-strong:text-foreground prose-a:text-foreground prose-li:text-foreground/80"
             >
               <ContentRenderer content={caseStudy.content as JSONContent} />
             </motion.div>
