@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isAdmin, isEditor, isLoading, error, signIn } = useAdminAuth();
+  const { user, isAdmin, isEditor, isLoading, isSigningIn, error, signIn } = useAdminAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
-                disabled={isLoading}
+                disabled={isSigningIn}
               />
             </div>
 
@@ -81,12 +81,12 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                disabled={isLoading}
+                disabled={isSigningIn}
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full" disabled={isSigningIn}>
+              {isSigningIn ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Signing in...

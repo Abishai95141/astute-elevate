@@ -95,14 +95,6 @@ export default function CaseStudy() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <Link
-                  to="/#portfolio"
-                  className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Portfolio
-                </Link>
-
                 <span className="inline-block text-xs uppercase tracking-widest text-muted-foreground mb-4">
                   {caseStudy.category}
                 </span>
