@@ -1,343 +1,442 @@
 
 
-# Comprehensive SEO Optimization Plan for Astute Computer
+# Comprehensive Case Studies CMS Plan
 
-This plan implements a complete SEO strategy for astutecomputer.com, including meta tags, structured data, sitemap, robots.txt, and on-page SEO optimizations.
+This plan creates a full-featured Content Management System for case studies with a rich text editor, image uploads, and dynamic frontend integration.
 
 ---
 
 ## Overview
 
-The project already has basic SEO meta tags in `index.html`. This plan enhances it with:
-- Dynamic meta tags using `react-helmet-async` for per-page SEO
-- Complete robots.txt with AI bot support
-- Dynamic XML sitemap
-- JSON-LD structured data (Organization, LocalBusiness, Service)
-- Semantic HTML improvements
-- Image alt text and lazy loading
-- Performance optimizations
+The current case studies are hardcoded in `Portfolio.tsx`. We'll transform this into a dynamic, database-driven system with:
+
+- **Admin Dashboard**: Protected CMS interface for managing case studies
+- **Rich Text Editor**: TipTap-based editor with formatting, headings, lists, and inline images
+- **Media Management**: Image uploads for thumbnails and content images via storage
+- **Dynamic Frontend**: Portfolio section pulling from database
+- **Individual Case Study Pages**: Full page view when clicking a case study
 
 ---
 
-## 1. Install react-helmet-async
+## Architecture Overview
 
-Add `react-helmet-async` for dynamic meta tag management:
+```text
++------------------------------------------+
+|           ADMIN DASHBOARD                |
+|  /admin/case-studies                     |
+|  +------------------------------------+  |
+|  |  Case Study List                   |  |
+|  |  [+ New] [Edit] [Delete] [Publish] |  |
+|  +------------------------------------+  |
+|  |  Rich Text Editor                  |  |
+|  |  - Thumbnail upload                |  |
+|  |  - Title, Category, Description    |  |
+|  |  - Stats (metric + value)          |  |
+|  |  - Full content (TipTap editor)    |  |
+|  |  - Gallery images                  |  |
+|  |  - SEO meta fields                 |  |
+|  +------------------------------------+  |
++------------------------------------------+
 
-```json
-"react-helmet-async": "^2.0.5"
-```
-
-This enables per-page meta tags that update dynamically based on content.
-
----
-
-## 2. Update robots.txt
-
-**File:** `public/robots.txt`
-
-```
-User-agent: *
-Allow: /
-Sitemap: https://astutecomputer.com/sitemap.xml
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
-User-agent: Anthropic-AI
-Allow: /
++------------------------------------------+
+|           PUBLIC FRONTEND                |
+|  /                                       |
+|  +------------------------------------+  |
+|  |  Portfolio Section (carousel)      |  |
+|  |  - Pulls from database             |  |
+|  |  - Shows published case studies    |  |
+|  |  - Click to view full page         |  |
+|  +------------------------------------+  |
+|                                          |
+|  /case-studies/:slug                     |
+|  +------------------------------------+  |
+|  |  Full Case Study Page              |  |
+|  |  - Hero with thumbnail             |  |
+|  |  - Rich content rendered           |  |
+|  |  - Image gallery                   |  |
+|  |  - Related case studies            |  |
+|  +------------------------------------+  |
++------------------------------------------+
 ```
 
 ---
 
-## 3. Create Static Sitemap XML
+## 1. Database Schema
 
-**File:** `public/sitemap.xml`
+### 1.1 Case Studies Table
 
-Since this is a single-page application with anchor sections, the sitemap will list the main URL with section anchors:
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| title | text | Case study title |
+| slug | text | URL-friendly identifier (unique) |
+| category | text | Service category |
+| short_description | text | Brief description for cards |
+| thumbnail_url | text | Main image URL |
+| thumbnail_alt | text | Alt text for accessibility |
+| stat_value | text | e.g., "150%", "10M+" |
+| stat_metric | text | e.g., "Brand Recognition" |
+| content | jsonb | TipTap JSON content |
+| is_published | boolean | Visibility toggle |
+| published_at | timestamp | When published |
+| meta_title | text | SEO title |
+| meta_description | text | SEO description |
+| display_order | integer | Sorting order |
+| created_at | timestamp | Creation date |
+| updated_at | timestamp | Last modified |
 
-| URL | Priority | Change Frequency |
-|-----|----------|-----------------|
-| https://astutecomputer.com/ | 1.0 | weekly |
-| https://astutecomputer.com/#services | 0.9 | monthly |
-| https://astutecomputer.com/#portfolio | 0.8 | monthly |
-| https://astutecomputer.com/#about | 0.7 | monthly |
-| https://astutecomputer.com/#sectors | 0.7 | monthly |
-| https://astutecomputer.com/#contact | 0.9 | monthly |
+### 1.2 Case Study Images Table (Gallery)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| case_study_id | uuid | Foreign key to case_studies |
+| image_url | text | Storage URL |
+| alt_text | text | Accessibility text |
+| caption | text | Optional caption |
+| display_order | integer | Gallery ordering |
+| created_at | timestamp | Upload date |
+
+### 1.3 User Roles Table (for admin access)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | References auth.users |
+| role | app_role enum | 'admin', 'editor', 'user' |
+
+### 1.4 Storage Bucket
+
+Create a `case-studies` storage bucket for:
+- Thumbnail images
+- Gallery images
+- Inline content images
 
 ---
 
-## 4. Create SEO Component Infrastructure
+## 2. Authentication & Authorization
 
-### 4.1 SEO Configuration File
+### 2.1 Admin Role System
 
-**New File:** `src/lib/seo.ts`
+- Create `app_role` enum with values: 'admin', 'editor', 'user'
+- Create `user_roles` table linking users to roles
+- Create `has_role()` security definer function for RLS policies
 
-Centralized SEO configuration containing:
-- Site metadata (title templates, descriptions)
-- Organization schema data
-- Service schema definitions
-- Social media links
+### 2.2 RLS Policies
 
-### 4.2 SEO Head Component
+**case_studies table:**
+- Public SELECT for published items (`is_published = true`)
+- Admin/Editor INSERT, UPDATE, DELETE
 
-**New File:** `src/components/SEOHead.tsx`
+**case_study_images table:**
+- Public SELECT for images linked to published case studies
+- Admin/Editor INSERT, UPDATE, DELETE
 
-Reusable component that renders:
-- Dynamic title and description
-- Canonical URL
-- Open Graph tags (og:title, og:description, og:image, og:url, og:type)
-- Twitter Card tags (twitter:card, twitter:title, twitter:description, twitter:image)
-- JSON-LD structured data
+**Storage policies:**
+- Public read access
+- Admin/Editor write access
 
 ---
 
-## 5. JSON-LD Structured Data
+## 3. Admin Interface Components
 
-### 5.1 Organization Schema (Homepage)
+### 3.1 New Pages
 
+| Route | Component | Purpose |
+|-------|-----------|---------|
+| /admin | AdminLayout | Admin shell with sidebar |
+| /admin/login | AdminLogin | Admin authentication |
+| /admin/case-studies | CaseStudyList | List all case studies |
+| /admin/case-studies/new | CaseStudyEditor | Create new |
+| /admin/case-studies/:id | CaseStudyEditor | Edit existing |
+
+### 3.2 CMS Dashboard Layout
+
+```text
++------------------------------------------+
+|  LOGO          Case Studies  |  Logout   |
++------------------------------------------+
+|         |                                |
+|  NAV    |    CONTENT AREA                |
+|         |                                |
+| Studies |    [Breadcrumb: All > Edit]    |
+| Media   |                                |
+| Settings|    +------------------------+  |
+|         |    |  Form/Editor Area      |  |
+|         |    +------------------------+  |
++------------------------------------------+
+```
+
+### 3.3 Case Study Editor Form
+
+**Thumbnail Section:**
+- Image upload dropzone
+- Preview thumbnail
+- Alt text input
+
+**Basic Info Section:**
+- Title (text input)
+- Slug (auto-generated, editable)
+- Category (dropdown: Digital Branding, Operations, AI Archives, Software Dev)
+- Short Description (textarea, max 160 chars)
+- Stat Value (text input)
+- Stat Metric (text input)
+
+**Content Section (Rich Text Editor):**
+- TipTap editor with toolbar
+- Formatting: Bold, Italic, Underline, Strike
+- Headings: H2, H3, H4
+- Lists: Bullet, Numbered
+- Blockquotes
+- Code blocks
+- Links
+- Image upload (inline)
+- Horizontal rule
+
+**Gallery Section:**
+- Drag-and-drop image uploads
+- Reorder gallery images
+- Alt text and caption per image
+- Delete images
+
+**SEO Section:**
+- Meta Title
+- Meta Description
+- OG Image (uses thumbnail by default)
+
+**Publishing Section:**
+- Status toggle (Draft/Published)
+- Display order (number input)
+- Save Draft / Publish buttons
+
+---
+
+## 4. Rich Text Editor (TipTap)
+
+### 4.1 Editor Configuration
+
+```text
+TipTap Extensions:
++------------------------------------------+
+| StarterKit (basic formatting)            |
+| Heading (levels: 2, 3, 4)                |
+| Image (with upload handler)              |
+| Link (with URL validation)               |
+| Placeholder ("Start writing...")         |
+| TextAlign (left, center, right)          |
+| Underline                                |
+| TextStyle + Color                        |
++------------------------------------------+
+```
+
+### 4.2 Image Upload in Editor
+
+When user adds an image:
+1. Open file picker or drag-drop
+2. Upload to storage bucket
+3. Get public URL
+4. Insert image node with URL
+
+### 4.3 Content Storage
+
+Store as TipTap JSON format in `content` column:
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Astute Computer",
-  "url": "https://astutecomputer.com",
-  "logo": "https://astutecomputer.com/logo.svg",
-  "description": "Digital transformation and software solutions...",
-  "sameAs": [
-    "https://twitter.com/astutecomputer",
-    "https://linkedin.com/company/astutecomputer"
-  ],
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+91-8667331224",
-    "email": "astutecomputer.contact@gmail.com",
-    "contactType": "customer service"
-  }
-}
-```
-
-### 5.2 Local Business Schema
-
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "Astute Computer",
-  "telephone": "+91-8667331224",
-  "email": "astutecomputer.contact@gmail.com",
-  "priceRange": "$$"
-}
-```
-
-### 5.3 Service Schema (for each service)
-
-Four service entries:
-- Digital Branding
-- Operations Digitalization
-- AI Document Archives
-- Custom Software Development
-
-### 5.4 BreadcrumbList Schema
-
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "position": 1, "name": "Home", "item": "https://astutecomputer.com" },
-    { "position": 2, "name": "Services", "item": "https://astutecomputer.com/#services" }
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "The Challenge" }]
+    },
+    {
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "..." }]
+    }
   ]
 }
 ```
 
-### 5.5 WebSite Schema (for search actions)
+---
+
+## 5. Frontend Integration
+
+### 5.1 Update Portfolio Component
+
+Modify `Portfolio.tsx` to:
+- Fetch published case studies from database
+- Use React Query for data fetching
+- Fallback to skeleton loading state
+- Link cards to individual case study pages
+
+### 5.2 Case Study Detail Page
+
+**Route:** `/case-studies/:slug`
+
+**Layout:**
+```text
++------------------------------------------+
+|  NAVBAR                                  |
++------------------------------------------+
+|                                          |
+|  [HERO - Full width thumbnail]           |
+|  Category badge                          |
+|  Title (H1)                              |
+|  Stats display                           |
+|                                          |
++------------------------------------------+
+|                                          |
+|  [Content Area - max-w-3xl centered]     |
+|  - Rendered TipTap content               |
+|  - Inline images                         |
+|  - Proper typography                     |
+|                                          |
++------------------------------------------+
+|                                          |
+|  [Image Gallery - Grid]                  |
+|  - Lightbox on click                     |
+|                                          |
++------------------------------------------+
+|                                          |
+|  [Related Case Studies]                  |
+|  - 3 cards from same category            |
+|                                          |
++------------------------------------------+
+|  FOOTER                                  |
++------------------------------------------+
+```
+
+### 5.3 Content Renderer
+
+Create a component to render TipTap JSON to React:
+- Parse JSON structure
+- Map node types to styled components
+- Handle images, headings, lists, etc.
+
+---
+
+## 6. File Structure
+
+### New Files to Create:
+
+```text
+src/
+├── components/
+│   ├── admin/
+│   │   ├── AdminLayout.tsx
+│   │   ├── AdminSidebar.tsx
+│   │   ├── CaseStudyEditor.tsx
+│   │   ├── CaseStudyForm.tsx
+│   │   ├── CaseStudyList.tsx
+│   │   ├── ImageUploader.tsx
+│   │   ├── RichTextEditor.tsx
+│   │   ├── GalleryManager.tsx
+│   │   └── EditorToolbar.tsx
+│   └── case-study/
+│       ├── CaseStudyCard.tsx
+│       ├── CaseStudyHero.tsx
+│       ├── CaseStudyContent.tsx
+│       ├── CaseStudyGallery.tsx
+│       ├── RelatedCaseStudies.tsx
+│       └── ContentRenderer.tsx
+├── hooks/
+│   ├── useCaseStudies.ts
+│   ├── useCaseStudy.ts
+│   ├── useAdminAuth.ts
+│   └── useImageUpload.ts
+├── pages/
+│   ├── admin/
+│   │   ├── AdminLogin.tsx
+│   │   ├── CaseStudies.tsx
+│   │   └── CaseStudyEdit.tsx
+│   └── CaseStudy.tsx
+└── lib/
+    └── tiptap-config.ts
+```
+
+### Files to Modify:
+
+| File | Changes |
+|------|---------|
+| `src/App.tsx` | Add new routes for admin and case study pages |
+| `src/components/Portfolio.tsx` | Fetch from database, link to detail pages |
+| `package.json` | Add TipTap dependencies |
+
+---
+
+## 7. Dependencies to Add
 
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Astute Computer",
-  "url": "https://astutecomputer.com"
+  "@tiptap/react": "^2.1.0",
+  "@tiptap/starter-kit": "^2.1.0",
+  "@tiptap/extension-image": "^2.1.0",
+  "@tiptap/extension-link": "^2.1.0",
+  "@tiptap/extension-placeholder": "^2.1.0",
+  "@tiptap/extension-text-align": "^2.1.0",
+  "@tiptap/extension-underline": "^2.1.0"
 }
 ```
 
 ---
 
-## 6. Application Integration
+## 8. Implementation Phases
 
-### 6.1 Update App.tsx
+### Phase 1: Database & Storage Setup
+1. Create `case_studies` table with all columns
+2. Create `case_study_images` table
+3. Create `user_roles` table with enum
+4. Create `case-studies` storage bucket
+5. Set up RLS policies
+6. Create `has_role()` function
 
-Wrap the application with `HelmetProvider`:
+### Phase 2: Authentication
+1. Create admin login page
+2. Implement `useAdminAuth` hook
+3. Create protected route wrapper
+4. Add initial admin user
 
-```tsx
-import { HelmetProvider } from 'react-helmet-async';
+### Phase 3: Admin CMS Interface
+1. Create admin layout with sidebar
+2. Build case study list view
+3. Create case study editor with form
+4. Implement image upload components
+5. Build rich text editor with TipTap
+6. Add gallery management
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      {/* ... */}
-    </QueryClientProvider>
-  </HelmetProvider>
-);
-```
+### Phase 4: Frontend Integration
+1. Update Portfolio component to fetch from DB
+2. Create case study detail page
+3. Build content renderer for TipTap JSON
+4. Add image gallery with lightbox
+5. Implement related case studies section
 
-### 6.2 Update Index Page
-
-Add SEO component to the homepage:
-
-```tsx
-import { SEOHead } from '@/components/SEOHead';
-
-const Index = () => (
-  <>
-    <SEOHead 
-      title="Astute Computer | Digital Transformation & Software"
-      description="Transform your business with Astute Computer..."
-      canonical="https://astutecomputer.com/"
-    />
-    {/* ... */}
-  </>
-);
-```
-
-### 6.3 Update NotFound Page
-
-Add appropriate SEO for 404 page:
-
-```tsx
-<SEOHead 
-  title="Page Not Found | Astute Computer"
-  description="The page you're looking for doesn't exist..."
-  noIndex={true}
-/>
-```
+### Phase 5: Polish & SEO
+1. Add loading states and skeletons
+2. Implement error handling
+3. Add SEO meta tags to case study pages
+4. Update sitemap to include case study URLs
+5. Add image optimization
 
 ---
 
-## 7. Semantic HTML & On-Page SEO
+## 9. Security Considerations
 
-### 7.1 Heading Hierarchy Verification
-
-Current structure (correct):
-- **Hero:** Single H1 tag - "Modernize Your Operations. Digitalize Your Legacy."
-- **Services:** H2 - "Our Services"
-- **Portfolio:** H2 - "Case Studies"
-- **About:** H2 - "We Build Digital Excellence"
-- **Sectors:** H2 - "Solving Industry Challenges"
-- **Contact:** H2 - "Let's Build Something Amazing Together"
-
-### 7.2 Image Alt Text Updates
-
-**Portfolio.tsx** - Add descriptive alt text:
-
-| Project | Alt Text |
-|---------|----------|
-| Corporate Rebrand | "Corporate rebranding case study - abstract digital design" |
-| Process Automation | "Business process automation - digital infrastructure visualization" |
-| AI Document System | "AI-powered document management system interface" |
-| E-Commerce Platform | "Custom e-commerce platform analytics dashboard" |
-| Healthcare Portal | "Healthcare patient management portal interface" |
+- Admin routes protected by authentication
+- Role-based access using `user_roles` table
+- RLS policies for all database operations
+- Storage bucket policies for uploads
+- Input validation on all form fields
+- Slug sanitization for URL safety
 
 ---
 
-## 8. Performance Optimizations
+## 10. UX Features
 
-### 8.1 Image Lazy Loading
-
-Add `loading="lazy"` to all images in:
-- Portfolio.tsx (project images)
-- Any other image components
-
-### 8.2 Update index.html
-
-Add additional performance meta tags:
-- DNS prefetch for external resources
-- Preconnect hints for fonts
-- X-UA-Compatible for older browsers
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/lib/seo.ts` | Centralized SEO configuration and schema definitions |
-| `src/components/SEOHead.tsx` | Reusable SEO meta tags component |
-| `public/sitemap.xml` | XML sitemap for search engines |
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `public/robots.txt` | Add sitemap reference and AI bot directives |
-| `src/App.tsx` | Wrap with HelmetProvider |
-| `src/pages/Index.tsx` | Add SEOHead component |
-| `src/pages/NotFound.tsx` | Add SEOHead component with noIndex |
-| `src/components/Portfolio.tsx` | Add descriptive alt text and lazy loading |
-| `index.html` | Add additional SEO meta tags and preconnects |
-
----
-
-## SEO Component Usage Example
-
-```tsx
-// For the homepage
-<SEOHead 
-  title="Astute Computer | Digital Transformation & Software Solutions"
-  description="Transform your business with Astute Computer. We offer digital branding, operations digitalization, AI-powered document archives, and custom software development."
-  canonical="https://astutecomputer.com/"
-  type="website"
-  image="https://astutecomputer.com/og-image.png"
-/>
-
-// For 404 page
-<SEOHead 
-  title="Page Not Found | Astute Computer"
-  description="Sorry, the page you're looking for doesn't exist."
-  noIndex={true}
-/>
-```
-
----
-
-## Structured Data Output
-
-The SEOHead component will inject the following JSON-LD scripts into the document head:
-
-1. **Organization** - Company information and social links
-2. **LocalBusiness** - Contact details
-3. **Service** (x4) - Each service offering with descriptions
-4. **WebSite** - Site-level schema for search features
-5. **BreadcrumbList** - Navigation context
-
----
-
-## Expected SEO Benefits
-
-| Improvement | Impact |
-|-------------|--------|
-| Dynamic meta tags | Better social sharing and search snippets |
-| Structured data | Rich snippets in search results |
-| Proper heading hierarchy | Better content understanding by search engines |
-| Image optimization | Faster load times, better accessibility |
-| Sitemap | Faster and more complete indexing |
-| AI bot access | Visibility in AI-powered search tools |
+- **Auto-save**: Draft saves every 30 seconds
+- **Unsaved changes warning**: Prompt before leaving with changes
+- **Image optimization**: Resize on upload
+- **Drag-and-drop**: For gallery reordering
+- **Preview mode**: See rendered content before publishing
+- **Bulk actions**: Publish/unpublish multiple case studies
 
