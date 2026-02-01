@@ -3,11 +3,11 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Send, MessageSquare, Mail, Phone, Check, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Send, MessageSquare, Mail, Check, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Form,
   FormControl,
@@ -79,35 +79,67 @@ export function Contact() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     
-    // Simulate form submission (replace with actual API call when backend is ready)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    console.log('Contact form submitted:', { ...data, email: '[REDACTED]' });
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success('Message sent successfully! We\'ll get back to you soon.');
-    
-    setTimeout(() => {
-      setIsSubmitted(false);
-      form.reset();
-    }, 3000);
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert({
+          name: data.name,
+          email: data.email,
+          phone: data.phone || null,
+          service: data.service,
+          message: data.message,
+        });
+
+      if (error) throw error;
+
+      setIsSubmitted(true);
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      
+      setTimeout(() => {
+        setIsSubmitted(false);
+        form.reset();
+      }, 3000);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onNewsletterSubmit = async (data: NewsletterFormData) => {
     setIsNewsletterSubmitting(true);
     
-    // Simulate newsletter submission (replace with actual API call when backend is ready)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    console.log('Newsletter subscription:', { email: '[REDACTED]' });
-    setIsNewsletterSubmitting(false);
-    setIsNewsletterSubmitted(true);
-    toast.success('Thanks for subscribing!');
-    
-    setTimeout(() => {
-      setIsNewsletterSubmitted(false);
-      newsletterForm.reset();
-    }, 3000);
+    try {
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .insert({
+          email: data.email,
+        });
+
+      if (error) {
+        // Check if it's a duplicate email error
+        if (error.code === '23505') {
+          toast.info('You\'re already subscribed!');
+          setIsNewsletterSubmitted(true);
+        } else {
+          throw error;
+        }
+      } else {
+        setIsNewsletterSubmitted(true);
+        toast.success('Thanks for subscribing!');
+      }
+      
+      setTimeout(() => {
+        setIsNewsletterSubmitted(false);
+        newsletterForm.reset();
+      }, 3000);
+    } catch (error) {
+      console.error('Error subscribing:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsNewsletterSubmitting(false);
+    }
   };
 
   const openWhatsApp = () => {
