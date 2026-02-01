@@ -39,7 +39,7 @@ export function Footer() {
               <img
                 src={logo}
                 alt="Astute Computer"
-                className="h-8 w-auto"
+                className="h-8 w-auto invert"
               />
               <span className="text-lg font-semibold text-foreground">
                 Astute Computer
