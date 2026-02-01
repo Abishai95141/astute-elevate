@@ -1,65 +1,93 @@
 import { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { usePublishedCaseStudies, type CaseStudy } from '@/hooks/useCaseStudies';
 
-const projects = [
+// Fallback data for when database is empty
+const fallbackProjects = [
   {
-    id: 1,
+    id: '1',
     title: 'Corporate Rebrand',
+    slug: 'corporate-rebrand',
     category: 'Digital Branding',
-    description: 'Complete visual identity overhaul for a Fortune 500 company.',
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
-    alt: 'Corporate rebranding case study - abstract digital design',
-    stats: { increase: '150%', metric: 'Brand Recognition' },
+    short_description: 'Complete visual identity overhaul for a Fortune 500 company.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
+    thumbnail_alt: 'Corporate rebranding case study - abstract digital design',
+    stat_value: '150%',
+    stat_metric: 'Brand Recognition',
+    is_published: true,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Process Automation',
+    slug: 'process-automation',
     category: 'Operations',
-    description: 'End-to-end workflow automation reducing manual work by 80%.',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80',
-    alt: 'Business process automation - digital infrastructure visualization',
-    stats: { increase: '80%', metric: 'Time Saved' },
+    short_description: 'End-to-end workflow automation reducing manual work by 80%.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80',
+    thumbnail_alt: 'Business process automation - digital infrastructure visualization',
+    stat_value: '80%',
+    stat_metric: 'Time Saved',
+    is_published: true,
   },
   {
-    id: 3,
+    id: '3',
     title: 'AI Document System',
+    slug: 'ai-document-system',
     category: 'AI Archives',
-    description: 'Intelligent document management for a legal firm.',
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
-    alt: 'AI-powered document management system interface',
-    stats: { increase: '10M+', metric: 'Documents Processed' },
+    short_description: 'Intelligent document management for a legal firm.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
+    thumbnail_alt: 'AI-powered document management system interface',
+    stat_value: '10M+',
+    stat_metric: 'Documents Processed',
+    is_published: true,
   },
   {
-    id: 4,
+    id: '4',
     title: 'E-Commerce Platform',
+    slug: 'e-commerce-platform',
     category: 'Software Dev',
-    description: 'Custom marketplace handling 100K+ daily transactions.',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-    alt: 'Custom e-commerce platform analytics dashboard',
-    stats: { increase: '300%', metric: 'Revenue Growth' },
+    short_description: 'Custom marketplace handling 100K+ daily transactions.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    thumbnail_alt: 'Custom e-commerce platform analytics dashboard',
+    stat_value: '300%',
+    stat_metric: 'Revenue Growth',
+    is_published: true,
   },
   {
-    id: 5,
+    id: '5',
     title: 'Healthcare Portal',
+    slug: 'healthcare-portal',
     category: 'Software Dev',
-    description: 'Patient management system serving 500+ clinics.',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
-    alt: 'Healthcare patient management portal interface',
-    stats: { increase: '99.9%', metric: 'Uptime' },
+    short_description: 'Patient management system serving 500+ clinics.',
+    thumbnail_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
+    thumbnail_alt: 'Healthcare patient management portal interface',
+    stat_value: '99.9%',
+    stat_metric: 'Uptime',
+    is_published: true,
   },
 ];
 
-function ProjectCard({
-  project,
-  index,
-}: {
-  project: (typeof projects)[0];
+interface ProjectCardProps {
+  project: {
+    id: string;
+    title: string;
+    slug: string;
+    category: string;
+    short_description: string;
+    thumbnail_url: string | null;
+    thumbnail_alt: string | null;
+    stat_value: string | null;
+    stat_metric: string | null;
+  };
   index: number;
-}) {
+  isFromDatabase: boolean;
+}
+
+function ProjectCard({ project, index, isFromDatabase }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  return (
+  const cardContent = (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
       whileInView={{ opacity: 1, x: 0 }}
@@ -76,12 +104,14 @@ function ProjectCard({
           animate={{ scale: isHovered ? 1.1 : 1 }}
           transition={{ duration: 0.6 }}
         >
-          <img
-            src={project.image}
-            alt={project.alt}
-            loading="lazy"
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-          />
+          {project.thumbnail_url && (
+            <img
+              src={project.thumbnail_url}
+              alt={project.thumbnail_alt || project.title}
+              loading="lazy"
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </motion.div>
 
@@ -98,18 +128,22 @@ function ProjectCard({
             {project.title}
           </h3>
           <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-            {project.description}
+            {project.short_description}
           </p>
 
           {/* Stats */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-3xl font-bold text-foreground">
-                {project.stats.increase}
-              </span>
-              <span className="text-sm text-muted-foreground ml-2">
-                {project.stats.metric}
-              </span>
+              {project.stat_value && (
+                <>
+                  <span className="text-3xl font-bold text-foreground">
+                    {project.stat_value}
+                  </span>
+                  <span className="text-sm text-muted-foreground ml-2">
+                    {project.stat_metric}
+                  </span>
+                </>
+              )}
             </div>
             <motion.div
               animate={{ x: isHovered ? 5 : 0 }}
@@ -122,12 +156,29 @@ function ProjectCard({
       </div>
     </motion.div>
   );
+
+  // Only link to detail page if from database
+  if (isFromDatabase) {
+    return (
+      <Link to={`/case-studies/${project.slug}`}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }
 
 export function Portfolio() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: '-100px' });
+  
+  const { data: caseStudies, isLoading } = usePublishedCaseStudies();
+  
+  // Use database data if available, otherwise fallback
+  const projects = caseStudies && caseStudies.length > 0 ? caseStudies : fallbackProjects;
+  const isFromDatabase = caseStudies && caseStudies.length > 0;
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -212,16 +263,27 @@ export function Portfolio() {
         {/* Right fade mask */}
         <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 lg:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
         
-        <div
-          ref={scrollRef}
-          className="flex gap-6 px-4 sm:px-8 lg:px-16 overflow-x-auto scrollbar-hide pb-4"
-        >
-          {projects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
-          ))}
-          {/* Spacer for last card visibility */}
-          <div className="flex-shrink-0 w-4 sm:w-8 lg:w-16" />
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div
+            ref={scrollRef}
+            className="flex gap-6 px-4 sm:px-8 lg:px-16 overflow-x-auto scrollbar-hide pb-4"
+          >
+            {projects.map((project, index) => (
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                index={index}
+                isFromDatabase={!!isFromDatabase}
+              />
+            ))}
+            {/* Spacer for last card visibility */}
+            <div className="flex-shrink-0 w-4 sm:w-8 lg:w-16" />
+          </div>
+        )}
       </div>
 
       {/* Stats Bar */}
