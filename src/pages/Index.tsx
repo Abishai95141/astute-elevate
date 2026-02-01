@@ -9,12 +9,20 @@ import { About } from '@/components/About';
 import { SectorProblems } from '@/components/SectorProblems';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
+import { SEOHead } from '@/components/SEOHead';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
     <>
+      <SEOHead
+        title="Astute Computer | Digital Transformation & Software Solutions"
+        description="Transform your business with Astute Computer. We offer digital branding, operations digitalization, AI-powered document archives, and custom software development."
+        canonical="https://astutecomputer.com/"
+        type="website"
+      />
+
       <AnimatePresence mode="wait">
         {isLoading && (
           <LoadingScreen onComplete={() => setIsLoading(false)} />
@@ -23,15 +31,15 @@ const Index = () => {
 
       {!isLoading && (
         <div className="relative min-h-screen bg-background noise">
-            <Navbar />
-            <main>
-              <Hero />
-              <Services />
-              <Portfolio />
-              <About />
-              <SectorProblems />
-              <Contact />
-            </main>
+          <Navbar />
+          <main>
+            <Hero />
+            <Services />
+            <Portfolio />
+            <About />
+            <SectorProblems />
+            <Contact />
+          </main>
           <Footer />
         </div>
       )}
