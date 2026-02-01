@@ -121,6 +121,17 @@ export function useAdminAuth() {
           }));
           return { error: new Error('Unauthorized') };
         }
+        
+        // Set user and roles immediately to avoid race condition
+        setState(prev => ({ 
+          ...prev, 
+          isSigningIn: false,
+          user: data.user,
+          session: data.session,
+          isAdmin: roles.isAdmin,
+          isEditor: roles.isEditor,
+        }));
+        return { data, roles };
       }
 
       setState(prev => ({ ...prev, isSigningIn: false }));
