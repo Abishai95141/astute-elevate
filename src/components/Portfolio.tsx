@@ -9,6 +9,7 @@ const projects = [
     category: 'Digital Branding',
     description: 'Complete visual identity overhaul for a Fortune 500 company.',
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
+    alt: 'Corporate rebranding case study - abstract digital design',
     stats: { increase: '150%', metric: 'Brand Recognition' },
   },
   {
@@ -17,6 +18,7 @@ const projects = [
     category: 'Operations',
     description: 'End-to-end workflow automation reducing manual work by 80%.',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80',
+    alt: 'Business process automation - digital infrastructure visualization',
     stats: { increase: '80%', metric: 'Time Saved' },
   },
   {
@@ -25,6 +27,7 @@ const projects = [
     category: 'AI Archives',
     description: 'Intelligent document management for a legal firm.',
     image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
+    alt: 'AI-powered document management system interface',
     stats: { increase: '10M+', metric: 'Documents Processed' },
   },
   {
@@ -33,6 +36,7 @@ const projects = [
     category: 'Software Dev',
     description: 'Custom marketplace handling 100K+ daily transactions.',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    alt: 'Custom e-commerce platform analytics dashboard',
     stats: { increase: '300%', metric: 'Revenue Growth' },
   },
   {
@@ -41,6 +45,7 @@ const projects = [
     category: 'Software Dev',
     description: 'Patient management system serving 500+ clinics.',
     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
+    alt: 'Healthcare patient management portal interface',
     stats: { increase: '99.9%', metric: 'Uptime' },
   },
 ];
@@ -73,7 +78,8 @@ function ProjectCard({
         >
           <img
             src={project.image}
-            alt={project.title}
+            alt={project.alt}
+            loading="lazy"
             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
