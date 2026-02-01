@@ -12,7 +12,8 @@ import { useEffect } from 'react';
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isAdmin, isEditor, isLoading, isSigningIn, error, signIn } = useAdminAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const { user, isAdmin, isEditor, isLoading, error, signIn, signUp } = useAdminAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -40,7 +41,14 @@ export default function AdminLogin() {
       return;
     }
 
-    await signIn(email, password);
+    if (isSignUp) {
+      const result = await signUp(email, password);
+      if (!result.error) {
+        setLocalError('Account created! Please check your email to verify, then contact an admin to grant you access.');
+      }
+    } else {
+      await signIn(email, password);
+    }
   };
 
   return (
@@ -49,7 +57,7 @@ export default function AdminLogin() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Astute CMS</CardTitle>
           <CardDescription>
-            Sign in to manage content
+            {isSignUp ? 'Create an account' : 'Sign in to manage content'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +77,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
-                disabled={isSigningIn}
+                disabled={isLoading}
               />
             </div>
 
@@ -81,20 +89,34 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                disabled={isSigningIn}
+                disabled={isLoading}
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSigningIn}>
-              {isSigningIn ? (
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Signing in...
+                  {isSignUp ? 'Creating account...' : 'Signing in...'}
                 </>
+              ) : isSignUp ? (
+                'Create Account'
               ) : (
                 'Sign In'
               )}
             </Button>
+
+            <div className="text-center text-sm">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary hover:underline"
+              >
+                {isSignUp
+                  ? 'Already have an account? Sign in'
+                  : "Need an account? Sign up"}
+              </button>
+            </div>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border">

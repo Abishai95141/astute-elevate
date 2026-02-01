@@ -59,21 +59,6 @@ export default function CaseStudy() {
       <div className="min-h-screen bg-background">
         <Navbar />
 
-        {/* Fixed Back Button */}
-        <div className="fixed top-24 left-4 z-40 md:left-8">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="backdrop-blur-sm bg-background/80 border-border/50 shadow-lg"
-          >
-            <Link to="/#portfolio">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
-        </div>
-
         <main>
           {/* Hero Section */}
           <section className="relative min-h-[60vh] flex items-end">
@@ -95,6 +80,14 @@ export default function CaseStudy() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
+                <Link
+                  to="/#portfolio"
+                  className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Portfolio
+                </Link>
+
                 <span className="inline-block text-xs uppercase tracking-widest text-muted-foreground mb-4">
                   {caseStudy.category}
                 </span>
