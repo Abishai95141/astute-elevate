@@ -1,101 +1,162 @@
 
-# Fix: Admin Login Stuck on "Signing in..."
+# Rebuild Admin Login System
 
-## Root Cause
+## Problem Analysis
 
-The login flow has a race condition between the `signIn` function and the `onAuthStateChange` listener:
+The current implementation has a fundamental issue: the `useAdminAuth` hook creates isolated state instances in each component. When you:
+1. Click "Sign In" on the login page
+2. The `signIn` function succeeds and updates state in the login page's hook instance
+3. Navigation to `/admin` triggers `AdminLayout` to mount
+4. `AdminLayout` creates a NEW instance of `useAdminAuth` with fresh state (`isLoading: true`)
+5. This new instance starts checking `getSession()` again
+6. Meanwhile, the login page may still show "Signing in..." if render timing is off
 
-1. User clicks Sign In → `isSigningIn` becomes `true`
-2. Auth succeeds (confirmed by 200 status in logs)
-3. `signIn` function checks roles and sets `isSigningIn: false`
-4. BUT the component redirect depends on `user && (isAdmin || isEditor)` from state
-5. The `onAuthStateChange` callback is async and takes time to update roles in state
-6. Result: Button shows "Signing in..." because state updates are racing
+Additionally, there's complexity from having async role checking inside `onAuthStateChange` which can cause race conditions.
 
-```text
-Current Problem:
-┌──────────────┐     ┌────────────────────┐
-│   signIn()   │     │ onAuthStateChange  │
-│ isSigningIn  │     │ (async callback)   │
-│   = false    │     │ checks roles...    │
-└──────────────┘     └────────────────────┘
-       ↓                      ↓
-   Returns                Still processing
-   immediately            role check
-```
+## Solution: Simplified Auth Architecture
 
-## Solution
+Rebuild the login system with a cleaner, more predictable flow:
 
-Navigate directly from the `signIn` function after confirming the user has admin/editor permissions, rather than waiting for the `onAuthStateChange` to update state and trigger the redirect effect.
+1. **Simplify the auth hook** - Remove async operations from `onAuthStateChange` callback
+2. **Use refs for navigation** - Avoid state-based navigation that can race
+3. **Separate concerns** - Auth checking vs. sign-in action
 
-### Changes to `src/hooks/useAdminAuth.ts`
+---
 
-Return a success flag with role information from `signIn`:
+## Implementation Plan
 
-```typescript
-// After role check succeeds (user is admin/editor)
-setState(prev => ({ 
-  ...prev, 
-  isSigningIn: false,
-  user: data.user,  // Set user immediately
-  isAdmin: roles.isAdmin,  // Set roles immediately  
-  isEditor: roles.isEditor 
-}));
-return { data, roles };  // Return roles so caller can act
-```
+### 1. Rewrite `src/hooks/useAdminAuth.ts`
 
-### Changes to `src/pages/admin/AdminLogin.tsx`
-
-Handle navigation in the submit handler after successful login:
+Create a cleaner implementation with:
+- Synchronous `onAuthStateChange` callback (defer role check)
+- Explicit loading states that don't conflict
+- A dedicated `checkRoles` function that can be called after auth state is known
 
 ```typescript
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLocalError(null);
-
-  if (!email || !password) {
-    setLocalError('Please enter email and password');
-    return;
-  }
-
-  const result = await signIn(email, password);
-  
-  // Navigate on success - don't wait for effect
-  if (!result.error) {
-    navigate('/admin');
-  }
-};
+// Key changes:
+// 1. Don't await inside onAuthStateChange - use setTimeout to defer
+// 2. Track "initializing" separately from "signing in"
+// 3. Return clear success/failure from signIn
 ```
+
+### 2. Rewrite `src/pages/admin/AdminLogin.tsx`
+
+Simplify to:
+- Local form state only (email, password, submitting, error)
+- Simple async submit handler that navigates on success
+- No useEffect-based redirects (they cause timing issues)
+- Check if already logged in once on mount, redirect if so
+
+```typescript
+// Key changes:
+// 1. Use local isSubmitting state instead of hook's isSigningIn
+// 2. Navigate immediately after signIn returns success
+// 3. Single useEffect for initial redirect check only
+```
+
+### 3. Keep `AdminLayout` simple
+
+The layout should continue to:
+- Show loading spinner during initial auth check
+- Redirect to login if not authenticated
+- Render children if authenticated
+
+---
 
 ## Technical Details
 
-### Files to Modify
+### New `useAdminAuth.ts` Structure
 
-1. **`src/hooks/useAdminAuth.ts`**
-   - Update the `signIn` function to immediately set user/roles in state after verification
-   - This ensures the state is updated synchronously after role check
+```typescript
+interface AdminAuthState {
+  user: User | null;
+  session: Session | null;
+  isAdmin: boolean;
+  isEditor: boolean;
+  isInitializing: boolean;  // Initial session check
+  error: string | null;
+}
 
-2. **`src/pages/admin/AdminLogin.tsx`**  
-   - Call `navigate('/admin')` directly after successful `signIn` call
-   - Keep the existing `useEffect` redirect as a backup for page refresh scenarios
-
-### Why This Works
-
-```text
-Fixed Flow:
-┌──────────────────────────────────────────┐
-│              signIn()                     │
-│  1. Auth succeeds                         │
-│  2. Check roles                           │
-│  3. Set user + roles in state immediately │
-│  4. Return success                        │
-└────────────────┬─────────────────────────┘
-                 ↓
-┌──────────────────────────────────────────┐
-│          handleSubmit()                   │
-│  5. Receives success                      │
-│  6. Calls navigate('/admin')              │
-└──────────────────────────────────────────┘
+// Key improvements:
+// 1. onAuthStateChange sets user/session immediately, then checks roles
+// 2. signIn function is self-contained - returns { success, error }
+// 3. No external loading state for sign-in (handled in component)
 ```
 
-The redirect happens synchronously in the same execution path as the login success, eliminating the race condition.
+### New `AdminLogin.tsx` Structure
+
+```typescript
+export default function AdminLogin() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { user, isAdmin, isEditor, isInitializing, signIn } = useAdminAuth();
+  const navigate = useNavigate();
+
+  // Single effect: redirect if already logged in
+  useEffect(() => {
+    if (!isInitializing && user && (isAdmin || isEditor)) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isInitializing, user, isAdmin, isEditor, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const result = await signIn(email, password);
+    
+    if (result.success) {
+      navigate('/admin', { replace: true });
+    } else {
+      setError(result.error || 'Sign in failed');
+      setIsSubmitting(false);
+    }
+  };
+
+  // Show loading only during initial check, not during form interaction
+  if (isInitializing) {
+    return <LoadingSpinner />;
+  }
+
+  // Form is always interactive once initialized
+  return <LoginForm />;
+}
+```
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/hooks/useAdminAuth.ts` | Complete rewrite with simplified state management |
+| `src/pages/admin/AdminLogin.tsx` | Use local submitting state, simplify redirects |
+
+---
+
+## Why This Will Work
+
+```text
+New Flow:
+┌─────────────────────────────────────────────────────────┐
+│                  Page Load                               │
+│  isInitializing = true → Show loading spinner            │
+│  getSession() runs → sets user if exists                 │
+│  checkRoles() runs → sets isAdmin/isEditor               │
+│  isInitializing = false → Show login form                │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│              User Clicks Sign In                         │
+│  Local isSubmitting = true → Button shows spinner        │
+│  signIn() called → auth.signInWithPassword              │
+│  Check roles immediately → verify admin/editor           │
+│  Return { success: true }                                │
+│  handleSubmit calls navigate('/admin')                   │
+│  Navigation happens SYNCHRONOUSLY after success          │
+└─────────────────────────────────────────────────────────┘
+```
+
+The key fix is moving the loading/submitting state to the component level and having the `signIn` function return a clear success/failure result that the component can act on immediately.
