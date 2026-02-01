@@ -62,7 +62,7 @@ export function Navbar() {
               <img
                 src={logo}
                 alt="Astute Computer"
-                className="h-8 w-auto invert"
+                className="h-8 w-auto"
               />
               <span className="hidden sm:block text-lg font-semibold tracking-tight text-foreground">
                 Astute Computer

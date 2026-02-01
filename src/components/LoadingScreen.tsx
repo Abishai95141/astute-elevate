@@ -41,7 +41,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         <motion.img
           src={logo}
           alt="Astute Computer"
-          className="h-16 w-auto invert"
+          className="h-16 w-auto"
           animate={{
             filter: [
               'brightness(1)',
