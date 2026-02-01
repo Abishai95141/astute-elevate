@@ -43,13 +43,17 @@ export default function AdminLogin() {
 
     setIsSubmitting(true);
 
-    const result = await signIn(email, password);
+    try {
+      const result = await signIn(email, password);
 
-    if (result.success) {
-      // Navigate immediately on success
-      navigate('/admin', { replace: true });
-    } else {
-      setError(result.error || 'Sign in failed');
+      if (result.success) {
+        navigate('/admin', { replace: true });
+      } else {
+        setError(result.error || 'Sign in failed');
+      }
+    } catch {
+      setError('An unexpected error occurred');
+    } finally {
       setIsSubmitting(false);
     }
   };

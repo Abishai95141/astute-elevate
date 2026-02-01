@@ -116,18 +116,26 @@ export function useAdminAuth() {
       });
 
       if (error) {
+        console.error('Auth error:', error);
         return { success: false, error: error.message };
       }
 
       if (!data.user) {
-        return { success: false, error: 'Sign in failed' };
+        return { success: false, error: 'Sign in failed - no user returned' };
       }
 
-      // Check roles immediately
-      const roles = await checkUserRole(data.user.id);
+      // Check roles with better error handling
+      let roles: { isAdmin: boolean; isEditor: boolean };
+      try {
+        roles = await checkUserRole(data.user.id);
+        console.log('Role check result:', roles);
+      } catch (roleError) {
+        console.error('Role check error:', roleError);
+        await supabase.auth.signOut();
+        return { success: false, error: 'Unable to verify permissions. Please try again.' };
+      }
 
       if (!roles.isAdmin && !roles.isEditor) {
-        // Sign out if not authorized
         await supabase.auth.signOut();
         return { success: false, error: 'You do not have permission to access the admin area.' };
       }
@@ -142,8 +150,9 @@ export function useAdminAuth() {
       });
 
       return { success: true };
-    } catch {
-      return { success: false, error: 'An error occurred during sign in' };
+    } catch (err) {
+      console.error('Sign in error:', err);
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
   };
 
