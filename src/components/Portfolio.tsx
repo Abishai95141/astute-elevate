@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const projects = [
@@ -62,7 +62,7 @@ function ProjectCard({
       viewport={{ once: true }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative flex-shrink-0 w-[350px] sm:w-[400px] lg:w-[450px] group cursor-pointer"
+      className="relative flex-shrink-0 w-[320px] sm:w-[380px] lg:w-[420px] group cursor-pointer"
     >
       <div className="relative overflow-hidden rounded-2xl bg-card border border-border/50 aspect-[4/5]">
         {/* Image */}
@@ -122,13 +122,6 @@ export function Portfolio() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: '-100px' });
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  });
-
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-50%']);
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -206,16 +199,23 @@ export function Portfolio() {
       </div>
 
       {/* Horizontal Scroll Gallery */}
-      <div className="relative overflow-hidden">
-        <motion.div
+      <div className="relative">
+        {/* Left fade mask */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 lg:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+        
+        {/* Right fade mask */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 lg:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+        
+        <div
           ref={scrollRef}
-          style={{ x }}
-          className="flex gap-6 pl-4 sm:pl-8 lg:pl-16 overflow-x-auto scrollbar-hide"
+          className="flex gap-6 px-4 sm:px-8 lg:px-16 overflow-x-auto scrollbar-hide pb-4"
         >
           {projects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
           ))}
-        </motion.div>
+          {/* Spacer for last card visibility */}
+          <div className="flex-shrink-0 w-4 sm:w-8 lg:w-16" />
+        </div>
       </div>
 
       {/* Stats Bar */}
