@@ -92,22 +92,22 @@ export function Hero() {
             View Solutions
           </MagneticButton>
         </motion.div>
+      </motion.div>
 
-        {/* Scroll Indicator */}
+      {/* Scroll Indicator - Fixed to bottom of viewport */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
+      >
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex flex-col items-center gap-2 text-muted-foreground"
         >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="flex flex-col items-center gap-2 text-muted-foreground"
-          >
-            <span className="text-xs uppercase tracking-widest">Scroll</span>
-            <div className="w-px h-12 bg-gradient-to-b from-foreground/50 to-transparent" />
-          </motion.div>
+          <span className="text-xs uppercase tracking-widest font-light">Scroll</span>
+          <div className="w-px h-10 bg-gradient-to-b from-foreground/50 to-transparent" />
         </motion.div>
       </motion.div>
     </section>

@@ -25,26 +25,19 @@ const values = [
   },
 ];
 
-const timeline = [
-  { year: '2019', event: 'Founded Astute Computer' },
-  { year: '2020', event: 'Expanded to AI solutions' },
-  { year: '2022', event: 'Reached 30+ enterprise clients' },
-  { year: '2024', event: 'Launched document AI platform' },
-];
-
 function TypewriterText({ text, delay = 0 }: { text: string; delay?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
 
   return (
-    <span ref={ref} className="inline-block">
+    <span ref={ref} className="inline">
       {text.split('').map((char, index) => (
         <motion.span
           key={index}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ delay: delay + index * 0.03 }}
-          className="inline-block"
+          className="inline"
         >
           {char === ' ' ? '\u00A0' : char}
         </motion.span>
@@ -64,7 +57,7 @@ export function About() {
 
       <div ref={ref} className="container-custom relative z-10">
         {/* Section Header */}
-        <div className="grid lg:grid-cols-2 gap-16 mb-24">
+        <div className="grid lg:grid-cols-2 gap-16 mb-20">
           <div>
             <motion.span
               initial={{ opacity: 0, y: 20 }}
@@ -102,15 +95,20 @@ export function About() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center py-16 mb-24 border-y border-border/30"
+          className="py-16 mb-20 border-y border-border/30"
         >
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-foreground/80 max-w-4xl mx-auto leading-relaxed">
-            "<TypewriterText text="Our mission is to transform complexity into simplicity, legacy into innovation, and ideas into reality." delay={0.5} />"
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-foreground/80 max-w-4xl mx-auto leading-relaxed text-center">
+            <span className="text-foreground/40">"</span>
+            <TypewriterText 
+              text="Our mission is to transform complexity into simplicity, legacy into innovation, and ideas into reality." 
+              delay={0.5} 
+            />
+            <span className="text-foreground/40">"</span>
           </p>
         </motion.div>
 
         {/* Values Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {values.map((value, index) => (
             <motion.div
               key={value.title}
@@ -133,46 +131,6 @@ export function About() {
               </p>
             </motion.div>
           ))}
-        </div>
-
-        {/* Timeline */}
-        <div className="relative">
-          <motion.h3
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-2xl font-bold text-foreground mb-12 text-center"
-          >
-            Our Journey
-          </motion.h3>
-
-          <div className="relative flex flex-col md:flex-row md:justify-between gap-8 md:gap-4">
-            {/* Line */}
-            <div className="hidden md:block absolute top-8 left-0 right-0 h-px bg-border" />
-
-            {timeline.map((item, index) => (
-              <motion.div
-                key={item.year}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
-                viewport={{ once: true }}
-                className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-2"
-              >
-                {/* Dot */}
-                <div className="relative z-10 w-4 h-4 rounded-full bg-background border-2 border-foreground flex-shrink-0" />
-                <div className="md:text-center">
-                  <span className="block text-2xl font-bold text-foreground mb-1">
-                    {item.year}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {item.event}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
