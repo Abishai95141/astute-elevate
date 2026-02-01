@@ -92,6 +92,13 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
+  }
+
+  /* Utility class for snap sections */
+  .snap-section {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
   }
 
   body {

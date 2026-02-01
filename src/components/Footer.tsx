@@ -26,7 +26,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-border/50 bg-card/50">
+    <footer className="snap-section relative border-t border-border/50 bg-card/50">
       <div className="container-custom py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}

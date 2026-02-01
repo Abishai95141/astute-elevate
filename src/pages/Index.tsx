@@ -9,7 +9,6 @@ import { About } from '@/components/About';
 import { SectorProblems } from '@/components/SectorProblems';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
-import { CustomCursor } from '@/components/CustomCursor';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,9 +22,7 @@ const Index = () => {
       </AnimatePresence>
 
       {!isLoading && (
-        <>
-          <CustomCursor />
-          <div className="relative min-h-screen bg-background noise">
+        <div className="relative min-h-screen bg-background noise">
             <Navbar />
             <main>
               <Hero />
@@ -35,9 +32,8 @@ const Index = () => {
               <SectorProblems />
               <Contact />
             </main>
-            <Footer />
-          </div>
-        </>
+          <Footer />
+        </div>
       )}
     </>
   );

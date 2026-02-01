@@ -33,7 +33,7 @@ export function Hero() {
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="snap-section relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* 3D Grid Background */}
       <FloatingGrid />

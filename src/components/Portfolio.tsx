@@ -134,7 +134,7 @@ export function Portfolio() {
     <section
       id="portfolio"
       ref={containerRef}
-      className="section-padding relative overflow-hidden"
+      className="snap-section section-padding relative overflow-hidden"
     >
       <div className="container-custom mb-16">
         {/* Section Header */}

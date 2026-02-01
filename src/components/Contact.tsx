@@ -154,7 +154,7 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="section-padding relative overflow-hidden">
+    <section id="contact" className="snap-section section-padding relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-to-b from-foreground/5 to-transparent rounded-full blur-3xl" />
