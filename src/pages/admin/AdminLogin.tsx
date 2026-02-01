@@ -40,7 +40,12 @@ export default function AdminLogin() {
       return;
     }
 
-    await signIn(email, password);
+    const result = await signIn(email, password);
+    
+    // Navigate on success - don't wait for effect
+    if (!result.error) {
+      navigate('/admin');
+    }
   };
 
   return (
