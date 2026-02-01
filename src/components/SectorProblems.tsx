@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { 
   Stethoscope, 
   Scale, 
@@ -18,6 +18,7 @@ const sectors = [
     description: 'Outdated patient management, compliance burdens, and fragmented data across departments.',
     solution: 'AI-powered document digitization and unified patient portals',
     size: 'large',
+    parallaxIntensity: 30,
   },
   {
     id: 'legal',
@@ -27,6 +28,7 @@ const sectors = [
     description: 'Hours wasted searching through case files, security vulnerabilities, and version control nightmares.',
     solution: 'Intelligent document archives with instant semantic search',
     size: 'medium',
+    parallaxIntensity: -20,
   },
   {
     id: 'manufacturing',
@@ -36,6 +38,7 @@ const sectors = [
     description: 'Excel-based inventory, disconnected supply chains, and no real-time visibility.',
     solution: 'End-to-end operations digitalization with live dashboards',
     size: 'medium',
+    parallaxIntensity: 25,
   },
   {
     id: 'finance',
@@ -45,6 +48,7 @@ const sectors = [
     description: 'Spreadsheet hell, compliance risks, and days-long report generation cycles.',
     solution: 'Automated compliance workflows and real-time analytics',
     size: 'medium',
+    parallaxIntensity: -15,
   },
   {
     id: 'retail',
@@ -54,6 +58,7 @@ const sectors = [
     description: 'Stock mismatches, poor omnichannel experiences, and lost sales opportunities.',
     solution: 'Unified commerce platforms with predictive inventory',
     size: 'medium',
+    parallaxIntensity: 20,
   },
   {
     id: 'education',
@@ -63,20 +68,43 @@ const sectors = [
     description: 'Outdated LMS systems, paper-heavy admissions, and poor student engagement.',
     solution: 'Modern learning platforms with automated administration',
     size: 'large',
+    parallaxIntensity: -25,
   },
 ];
 
 function SectorCard({ 
   sector, 
-  index 
+  index,
+  scrollProgress,
 }: { 
   sector: typeof sectors[0]; 
   index: number;
+  scrollProgress: any;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   
+  // Individual parallax transformation based on scroll progress
+  const y = useTransform(
+    scrollProgress, 
+    [0, 1], 
+    [sector.parallaxIntensity, -sector.parallaxIntensity]
+  );
+  
+  const scale = useTransform(
+    scrollProgress,
+    [0, 0.5, 1],
+    [0.95, 1, 0.95]
+  );
+  
+  const rotateX = useTransform(
+    scrollProgress,
+    [0, 0.5, 1],
+    [index % 2 === 0 ? 2 : -2, 0, index % 2 === 0 ? -2 : 2]
+  );
+  
   return (
     <motion.div
+      style={{ y, scale, rotateX }}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ 
@@ -163,11 +191,15 @@ function SectorCard({
   );
 }
 
-import { useState } from 'react';
-
 export function SectorProblems() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  
+  // Scroll progress for parallax effect
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
 
   return (
     <section id="sectors" className="section-padding relative overflow-hidden">
@@ -208,10 +240,15 @@ export function SectorProblems() {
           </motion.p>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        {/* Bento Grid with Parallax */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 perspective-1000">
           {sectors.map((sector, index) => (
-            <SectorCard key={sector.id} sector={sector} index={index} />
+            <SectorCard 
+              key={sector.id} 
+              sector={sector} 
+              index={index} 
+              scrollProgress={scrollYProgress}
+            />
           ))}
         </div>
 

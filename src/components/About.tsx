@@ -29,18 +29,31 @@ function TypewriterText({ text, delay = 0 }: { text: string; delay?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
 
+  // Split text into words for better line wrapping
+  const words = text.split(' ');
+
   return (
     <span ref={ref} className="inline">
-      {text.split('').map((char, index) => (
-        <motion.span
-          key={index}
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ delay: delay + index * 0.03 }}
-          className="inline"
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </motion.span>
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className="inline-block whitespace-nowrap">
+          {word.split('').map((char, charIndex) => {
+            const totalIndex = words.slice(0, wordIndex).join(' ').length + (wordIndex > 0 ? 1 : 0) + charIndex;
+            return (
+              <motion.span
+                key={`${wordIndex}-${charIndex}`}
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ delay: delay + totalIndex * 0.025 }}
+                className="inline"
+              >
+                {char}
+              </motion.span>
+            );
+          })}
+          {wordIndex < words.length - 1 && (
+            <span className="inline">&nbsp;</span>
+          )}
+        </span>
       ))}
     </span>
   );
@@ -97,14 +110,30 @@ export function About() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="py-16 mb-20 border-y border-border/30"
         >
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-foreground/80 max-w-4xl mx-auto leading-relaxed text-center">
-            <span className="text-foreground/40">"</span>
-            <TypewriterText 
-              text="Our mission is to transform complexity into simplicity, legacy into innovation, and ideas into reality." 
-              delay={0.5} 
-            />
-            <span className="text-foreground/40">"</span>
-          </p>
+          <div className="max-w-4xl mx-auto px-4">
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-foreground/80 leading-relaxed text-center">
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-foreground/40 mr-2"
+              >
+                "
+              </motion.span>
+              <TypewriterText 
+                text="Our mission is to transform complexity into simplicity, legacy into innovation, and ideas into reality." 
+                delay={0.5} 
+              />
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ delay: 3.5 }}
+                className="text-foreground/40 ml-2"
+              >
+                "
+              </motion.span>
+            </p>
+          </div>
         </motion.div>
 
         {/* Values Grid */}
