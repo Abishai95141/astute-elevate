@@ -10,6 +10,7 @@ interface AdminAuthState {
   isAdmin: boolean;
   isEditor: boolean;
   isLoading: boolean;
+  isSigningIn: boolean;
   error: string | null;
 }
 
@@ -20,6 +21,7 @@ export function useAdminAuth() {
     isAdmin: false,
     isEditor: false,
     isLoading: true,
+    isSigningIn: false,
     error: null,
   });
 
@@ -48,23 +50,25 @@ export function useAdminAuth() {
       async (event, session) => {
         if (session?.user) {
           const roles = await checkUserRole(session.user.id);
-          setState({
+          setState(prev => ({
+            ...prev,
             user: session.user,
             session,
             isAdmin: roles.isAdmin,
             isEditor: roles.isEditor,
             isLoading: false,
             error: null,
-          });
+          }));
         } else {
-          setState({
+          setState(prev => ({
+            ...prev,
             user: null,
             session: null,
             isAdmin: false,
             isEditor: false,
             isLoading: false,
             error: null,
-          });
+          }));
         }
       }
     );
@@ -73,14 +77,15 @@ export function useAdminAuth() {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const roles = await checkUserRole(session.user.id);
-        setState({
+        setState(prev => ({
+          ...prev,
           user: session.user,
           session,
           isAdmin: roles.isAdmin,
           isEditor: roles.isEditor,
           isLoading: false,
           error: null,
-        });
+        }));
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
       }
@@ -90,7 +95,7 @@ export function useAdminAuth() {
   }, [checkUserRole]);
 
   const signIn = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState(prev => ({ ...prev, isSigningIn: true, error: null }));
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -98,10 +103,11 @@ export function useAdminAuth() {
     });
 
     if (error) {
-      setState(prev => ({ ...prev, isLoading: false, error: error.message }));
+      setState(prev => ({ ...prev, isSigningIn: false, error: error.message }));
       return { error };
     }
 
+    setState(prev => ({ ...prev, isSigningIn: false }));
     return { data };
   };
 
@@ -127,14 +133,15 @@ export function useAdminAuth() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setState({
+    setState(prev => ({
+      ...prev,
       user: null,
       session: null,
       isAdmin: false,
       isEditor: false,
       isLoading: false,
       error: null,
-    });
+    }));
   };
 
   return {
