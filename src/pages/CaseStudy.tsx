@@ -14,6 +14,23 @@ import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet-async';
 import { siteConfig, generateBreadcrumbSchema } from '@/lib/seo';
 import type { JSONContent } from '@tiptap/react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+// Section configuration matching the editor
+const SECTION_CONFIG = [
+  { key: 'context', label: 'Client & Context' },
+  { key: 'problem', label: 'The Problem' },
+  { key: 'goals', label: 'Success Criteria' },
+  { key: 'solution', label: 'Our Solution' },
+  { key: 'implementation', label: 'Implementation' },
+  { key: 'results_narrative', label: 'Results' },
+  { key: 'next_steps', label: 'Next Steps' },
+];
 
 // Map service names to slugs for internal linking
 const SERVICE_SLUG_MAP: Record<string, string> = {
@@ -108,6 +125,9 @@ export default function CaseStudy() {
       },
     })),
   } : null;
+
+  // Parse section_content from the case study
+  const sectionContent = (caseStudy as any).section_content as Record<string, JSONContent> | null;
 
   // Get related services for linking
   const relatedServices = ((caseStudy as any).services || []) as string[];
@@ -227,37 +247,46 @@ export default function CaseStudy() {
             </div>
           </section>
 
-          {/* Content Section */}
-          <section className="container-custom py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="max-w-3xl mx-auto prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-strong:text-foreground prose-a:text-foreground prose-li:text-foreground/80"
-            >
-              <ContentRenderer content={caseStudy.content as JSONContent} />
-            </motion.div>
-          </section>
-
-          {/* FAQs Section */}
-          {faqs.length > 0 && (
+          {/* Section Content */}
+          {sectionContent && (
             <section className="container-custom py-16">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-                className="max-w-3xl mx-auto"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="max-w-3xl mx-auto prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-strong:text-foreground prose-a:text-foreground prose-li:text-foreground/80"
               >
-                <h2 className="text-2xl font-bold mb-8">Frequently Asked Questions</h2>
-                <div className="space-y-6">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="border-b border-border/50 pb-6">
-                      <h3 className="text-lg font-semibold text-foreground mb-2">{faq.question}</h3>
-                      <p className="text-muted-foreground">{faq.answer}</p>
-                    </div>
-                  ))}
-                </div>
+                {SECTION_CONFIG.map(({ key, label }) => {
+                  const content = sectionContent[key] as JSONContent | undefined;
+                  if (!content || !content.content?.length) return null;
+                  return (
+                    <motion.div
+                      key={key}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      viewport={{ once: true }}
+                      className="mb-12"
+                    >
+                      <h2>{label}</h2>
+                      <ContentRenderer content={content} />
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </section>
+          )}
+
+          {/* Legacy Content Fallback */}
+          {!sectionContent && caseStudy.content && (
+            <section className="container-custom py-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="max-w-3xl mx-auto prose prose-lg prose-invert prose-headings:text-foreground prose-p:text-foreground/80 prose-strong:text-foreground prose-a:text-foreground prose-li:text-foreground/80"
+              >
+                <ContentRenderer content={caseStudy.content as JSONContent} />
               </motion.div>
             </section>
           )}
@@ -273,6 +302,33 @@ export default function CaseStudy() {
               >
                 <h2 className="text-2xl font-bold mb-8">Project Gallery</h2>
                 <CaseStudyGallery images={images} />
+              </motion.div>
+            </section>
+          )}
+
+          {/* FAQs Section - Expandable Accordion */}
+          {faqs.length > 0 && (
+            <section className="container-custom py-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="max-w-3xl mx-auto"
+              >
+                <h2 className="text-2xl font-bold mb-8">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`faq-${index}`} className="border-border/50">
+                      <AccordionTrigger className="text-left text-lg font-semibold hover:no-underline">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground text-base">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </motion.div>
             </section>
           )}
