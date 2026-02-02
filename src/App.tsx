@@ -16,6 +16,8 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CaseStudies from "./pages/admin/CaseStudies";
 import CaseStudyEdit from "./pages/admin/CaseStudyEdit";
+import ChennaiPage from "./pages/ChennaiPage";
+import NeighborhoodPage from "./pages/NeighborhoodPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,10 @@ const App = () => (
             <Route path="/industries/:slug" element={<IndustryPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            
+            {/* Location Pages - Local SEO */}
+            <Route path="/chennai" element={<ChennaiPage />} />
+            <Route path="/chennai/:neighborhood" element={<NeighborhoodPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

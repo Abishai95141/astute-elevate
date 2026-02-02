@@ -5,10 +5,24 @@ export const siteConfig = {
   url: 'https://astutecomputer.com',
   ogImage: 'https://astutecomputer.com/og-image.png',
   description: 'Transform your business with Astute Computer. We offer digital branding, operations digitalization, AI-powered document archives, and custom software development.',
-  keywords: 'digital transformation, software development, AI, document management, branding, business automation',
+  keywords: 'digital transformation, software development, AI, document management, branding, business automation, Chennai, Tamil Nadu',
   author: 'Astute Computer',
   phone: '+91-8667331224',
   email: 'astutecomputer.contact@gmail.com',
+  address: {
+    street: '130 MTH Road, I Floor, Lucky Towers',
+    landmark: 'Opp. Ambattur Estate Bus Stand',
+    area: 'Padi',
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    postalCode: '600058',
+    country: 'India',
+    countryCode: 'IN',
+  },
+  geo: {
+    latitude: 13.0527,
+    longitude: 80.1831,
+  },
   social: {
     twitter: 'https://twitter.com/astutecomputer',
     linkedin: 'https://linkedin.com/company/astutecomputer',
@@ -32,16 +46,48 @@ export const organizationSchema = {
   },
 };
 
-// Local Business Schema
+// Enhanced Local Business Schema with Chennai focus
 export const localBusinessSchema = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
+  '@id': `${siteConfig.url}/#business`,
   name: siteConfig.name,
   url: siteConfig.url,
+  image: siteConfig.ogImage,
   telephone: siteConfig.phone,
   email: siteConfig.email,
   priceRange: '$$',
-  image: siteConfig.ogImage,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: siteConfig.address.street,
+    addressLocality: siteConfig.address.city,
+    addressRegion: siteConfig.address.state,
+    postalCode: siteConfig.address.postalCode,
+    addressCountry: siteConfig.address.countryCode,
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: siteConfig.geo.latitude,
+    longitude: siteConfig.geo.longitude,
+  },
+  areaServed: [
+    { '@type': 'City', name: 'Chennai' },
+    { '@type': 'State', name: 'Tamil Nadu' },
+    { '@type': 'Place', name: 'Anna Nagar, Chennai' },
+    { '@type': 'Place', name: 'Ambattur, Chennai' },
+    { '@type': 'Place', name: 'Velachery, Chennai' },
+    { '@type': 'Place', name: 'T. Nagar, Chennai' },
+    { '@type': 'Place', name: 'Adyar, Chennai' },
+    { '@type': 'Place', name: 'Guindy, Chennai' },
+    { '@type': 'Place', name: 'Porur, Chennai' },
+    { '@type': 'Place', name: 'Tambaram, Chennai' },
+  ],
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    opens: '09:00',
+    closes: '18:00',
+  },
 };
 
 // Website Schema

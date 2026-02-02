@@ -6,7 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useServiceBySlug, useCaseStudiesByService } from '@/hooks/useServices';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2, MapPin } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { siteConfig, generateBreadcrumbSchema } from '@/lib/seo';
 import { Helmet } from 'react-helmet-async';
@@ -79,10 +79,10 @@ export default function ServicePage() {
       url: siteConfig.url,
     },
     serviceType: service.title,
-    areaServed: {
-      '@type': 'Country',
-      name: 'India',
-    },
+    areaServed: [
+      { '@type': 'City', name: 'Chennai' },
+      { '@type': 'State', name: 'Tamil Nadu' },
+    ],
   };
 
   return (
@@ -211,6 +211,78 @@ export default function ServicePage() {
                   </motion.div>
                 )}
               </div>
+            </div>
+          </section>
+
+          {/* Chennai Availability Section */}
+          <section className="py-16">
+            <div className="container-custom">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <div className="p-8 rounded-2xl border border-border/50 bg-card/50">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="p-3 rounded-xl bg-foreground/5 border border-foreground/10">
+                      <MapPin className="h-6 w-6 text-foreground" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        Available in Chennai & Tamil Nadu
+                      </h2>
+                      <p className="text-muted-foreground max-w-2xl">
+                        Our {service.title.toLowerCase()} services are available across Chennai and Tamil Nadu.
+                        Visit our Padi office for in-person consultations or connect with us remotely.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                    <div className="p-4 rounded-lg bg-background border border-border/30">
+                      <p className="text-sm text-muted-foreground">On-Site Available</p>
+                      <p className="font-semibold text-foreground">Yes, across Chennai</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-background border border-border/30">
+                      <p className="text-sm text-muted-foreground">Response Time</p>
+                      <p className="font-semibold text-foreground">Same day for Chennai</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-background border border-border/30">
+                      <p className="text-sm text-muted-foreground">Industries Served</p>
+                      <p className="font-semibold text-foreground">Healthcare, Legal, Manufacturing</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      to="/chennai"
+                      className="px-4 py-2 rounded-lg border border-foreground/20 hover:bg-foreground/5 transition-colors text-sm flex items-center gap-2"
+                    >
+                      Chennai Hub
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/chennai/anna-nagar"
+                      className="px-4 py-2 rounded-lg border border-border/50 hover:border-foreground/20 transition-colors text-sm"
+                    >
+                      Anna Nagar
+                    </Link>
+                    <Link
+                      to="/chennai/ambattur"
+                      className="px-4 py-2 rounded-lg border border-border/50 hover:border-foreground/20 transition-colors text-sm"
+                    >
+                      Ambattur
+                    </Link>
+                    <Link
+                      to="/chennai/velachery"
+                      className="px-4 py-2 rounded-lg border border-border/50 hover:border-foreground/20 transition-colors text-sm"
+                    >
+                      Velachery
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </section>
 

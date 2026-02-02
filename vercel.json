@@ -4,6 +4,8 @@
     { "source": "/case-studies/:path*", "destination": "/" },
     { "source": "/services/:path*", "destination": "/" },
     { "source": "/industries/:path*", "destination": "/" },
+    { "source": "/chennai", "destination": "/" },
+    { "source": "/chennai/:path*", "destination": "/" },
     { "source": "/about", "destination": "/" },
     { "source": "/contact", "destination": "/" }
   ]
