@@ -17,18 +17,27 @@ export type Database = {
       case_studies: {
         Row: {
           category: string
+          client_type: string | null
           content: Json | null
           created_at: string
           display_order: number
+          faqs: Json | null
           id: string
+          industry: string | null
           is_published: boolean
           meta_description: string | null
           meta_title: string | null
           published_at: string | null
+          related_case_study_ids: string[] | null
+          related_service_ids: string[] | null
+          results: Json | null
+          section_content: Json | null
+          services: string[] | null
           short_description: string
           slug: string
           stat_metric: string | null
           stat_value: string | null
+          tech_stack: string[] | null
           thumbnail_alt: string | null
           thumbnail_url: string | null
           title: string
@@ -36,18 +45,27 @@ export type Database = {
         }
         Insert: {
           category: string
+          client_type?: string | null
           content?: Json | null
           created_at?: string
           display_order?: number
+          faqs?: Json | null
           id?: string
+          industry?: string | null
           is_published?: boolean
           meta_description?: string | null
           meta_title?: string | null
           published_at?: string | null
+          related_case_study_ids?: string[] | null
+          related_service_ids?: string[] | null
+          results?: Json | null
+          section_content?: Json | null
+          services?: string[] | null
           short_description: string
           slug: string
           stat_metric?: string | null
           stat_value?: string | null
+          tech_stack?: string[] | null
           thumbnail_alt?: string | null
           thumbnail_url?: string | null
           title: string
@@ -55,18 +73,27 @@ export type Database = {
         }
         Update: {
           category?: string
+          client_type?: string | null
           content?: Json | null
           created_at?: string
           display_order?: number
+          faqs?: Json | null
           id?: string
+          industry?: string | null
           is_published?: boolean
           meta_description?: string | null
           meta_title?: string | null
           published_at?: string | null
+          related_case_study_ids?: string[] | null
+          related_service_ids?: string[] | null
+          results?: Json | null
+          section_content?: Json | null
+          services?: string[] | null
           short_description?: string
           slug?: string
           stat_metric?: string | null
           stat_value?: string | null
+          tech_stack?: string[] | null
           thumbnail_alt?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -160,6 +187,60 @@ export type Database = {
           id?: string
           is_active?: boolean
           subscribed_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          benefits: string[] | null
+          content: Json | null
+          created_at: string
+          display_order: number
+          features: string[] | null
+          icon: string | null
+          id: string
+          is_published: boolean
+          long_description: string | null
+          meta_description: string | null
+          meta_title: string | null
+          short_description: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          content?: Json | null
+          created_at?: string
+          display_order?: number
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          long_description?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          short_description: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string[] | null
+          content?: Json | null
+          created_at?: string
+          display_order?: number
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          long_description?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          short_description?: string
+          slug?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -215,42 +215,52 @@ export function Portfolio() {
             </motion.h2>
           </div>
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows + View All Link */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex items-center gap-3"
+            className="flex items-center gap-4"
           >
-            <motion.button
-              onClick={() => scrollCarousel('left')}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
+            <Link
+              to="/case-studies"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
-              <ChevronLeft size={20} />
-            </motion.button>
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             
-            {/* Animated connecting line */}
-            <div className="relative w-8 h-px">
-              <div className="absolute inset-0 bg-border/50" />
-              <motion.div
-                className="absolute inset-0 bg-foreground/50"
-                animate={{ scaleX: [0, 1, 0], originX: ['0%', '0%', '100%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
+            <div className="flex items-center gap-3">
+              <motion.button
+                onClick={() => scrollCarousel('left')}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
+              >
+                <ChevronLeft size={20} />
+              </motion.button>
+              
+              {/* Animated connecting line */}
+              <div className="relative w-8 h-px">
+                <div className="absolute inset-0 bg-border/50" />
+                <motion.div
+                  className="absolute inset-0 bg-foreground/50"
+                  animate={{ scaleX: [0, 1, 0], originX: ['0%', '0%', '100%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </div>
+              
+              <motion.button
+                onClick={() => scrollCarousel('right')}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{ x: [0, 3, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
+              >
+                <ChevronRight size={20} />
+              </motion.button>
             </div>
-            
-            <motion.button
-              onClick={() => scrollCarousel('right')}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              animate={{ x: [0, 3, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-12 h-12 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/50 hover:shadow-[0_0_20px_hsl(var(--foreground)/0.1)] transition-all duration-300"
-            >
-              <ChevronRight size={20} />
-            </motion.button>
           </motion.div>
         </div>
       </div>

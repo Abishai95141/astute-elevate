@@ -2,6 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 
+export interface CaseStudyResult {
+  label: string;
+  value: string;
+  context?: string;
+}
+
+export interface CaseStudyFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface CaseStudy {
   id: string;
   title: string;
@@ -20,6 +31,16 @@ export interface CaseStudy {
   display_order: number;
   created_at: string;
   updated_at: string;
+  // New SEO fields - kept as Json since that's what DB returns
+  industry: string | null;
+  services: string[] | null;
+  tech_stack: string[] | null;
+  results: Json | null;
+  client_type: string | null;
+  faqs: Json | null;
+  related_case_study_ids: string[] | null;
+  related_service_ids: string[] | null;
+  section_content: Json | null;
 }
 
 export interface CaseStudyInput {
@@ -37,6 +58,16 @@ export interface CaseStudyInput {
   meta_title?: string | null;
   meta_description?: string | null;
   display_order?: number;
+  // New SEO fields
+  industry?: string | null;
+  services?: string[] | null;
+  tech_stack?: string[] | null;
+  results?: Json | null;
+  client_type?: string | null;
+  faqs?: Json | null;
+  related_case_study_ids?: string[] | null;
+  related_service_ids?: string[] | null;
+  section_content?: Json | null;
 }
 
 // Fetch all published case studies for frontend

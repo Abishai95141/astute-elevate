@@ -7,6 +7,10 @@ import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CaseStudy from "./pages/CaseStudy";
+import CaseStudiesHub from "./pages/CaseStudiesHub";
+import ServicePage from "./pages/ServicePage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CaseStudies from "./pages/admin/CaseStudies";
@@ -23,7 +27,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/case-studies" element={<CaseStudiesHub />} />
             <Route path="/case-studies/:slug" element={<CaseStudy />} />
+            <Route path="/services/:slug" element={<ServicePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
