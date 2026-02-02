@@ -18,6 +18,7 @@ function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: strin
   
   const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
   const hasX = value.includes('x');
+  const prefix = value.match(/^[^0-9]*/)?.[0] || '';
   
   return (
     <span ref={ref} className="tabular-nums">
@@ -27,7 +28,7 @@ function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: strin
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {hasX ? value : `${numericValue}${suffix}`}
+          {hasX ? value : `${prefix}${numericValue}${suffix}`}
         </motion.span>
       ) : '0'}
     </span>
@@ -240,27 +241,18 @@ export default function IndustryPage() {
               transition={{ delay: 1, duration: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              <MagneticButton>
-                <Button
-                  size="lg"
-                  className="text-base px-8 button-glow"
-                  onClick={() => navigate('/contact')}
-                >
-                  Start Your Project
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+              <MagneticButton 
+                variant="primary" 
+                onClick={() => navigate('/contact')}
+              >
+                Start Your Project
+                <ArrowRight className="w-4 h-4 ml-2" />
               </MagneticButton>
-              <MagneticButton>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8"
-                  onClick={() => {
-                    document.getElementById('problems')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Explore Solutions
-                </Button>
+              <MagneticButton 
+                variant="secondary" 
+                onClick={() => document.getElementById('problems')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Explore Solutions
               </MagneticButton>
             </motion.div>
           </motion.div>
@@ -306,7 +298,7 @@ export default function IndustryPage() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -8 }}
-                  className="group p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-foreground/20 transition-all duration-300"
+                  className="group relative p-6 sm:p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-foreground/20 transition-all duration-300"
                 >
                   <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-foreground/90">
                     {problem.title}
@@ -528,15 +520,12 @@ export default function IndustryPage() {
                 Tell us about your challenges and goals.
               </p>
               
-              <MagneticButton>
-                <Button
-                  size="lg"
-                  className="text-base px-10 py-6 button-glow"
-                  onClick={() => navigate('/contact')}
-                >
-                  Schedule a Consultation
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+              <MagneticButton 
+                variant="primary" 
+                onClick={() => navigate('/contact')}
+              >
+                Schedule a Consultation
+                <ArrowRight className="w-4 h-4 ml-2" />
               </MagneticButton>
             </motion.div>
           </div>
