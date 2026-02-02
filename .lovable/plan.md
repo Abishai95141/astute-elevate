@@ -1,112 +1,97 @@
 
-# Fix Case Study Page: Render Section Content & Expandable FAQs
+# Fix Markdown-to-TipTap Conversion
 
-The case study page currently only displays the old `content` field and FAQs as static text. This plan updates the page to render the structured `section_content` with semantic H2 headings and converts FAQs to an expandable accordion.
-
----
-
-## Problem Analysis
-
-**Current Behavior:**
-- Only the old `content` field is rendered via `ContentRenderer` (line 238)
-- `section_content` (which contains Problem, Solution, etc.) is stored in the database but never displayed
-- FAQs are rendered as static divs, not expandable accordions
-
-**Expected Behavior:**
-- Display each populated section from `section_content` with proper H2 headings
-- Render FAQs at the bottom as an expandable accordion
+The `markdownToTipTap` function in `src/lib/markdown-parser.ts` is too simplistic. It's treating all markdown content as plain text paragraphs instead of converting markdown syntax into proper TipTap JSON structures with marks (bold, italic) and nodes (headings, lists).
 
 ---
 
-## Implementation
+## Problem
 
-### 1. Update CaseStudy.tsx to Render Section Content
+The current function:
+- Ignores `**bold**` syntax - outputs raw `**text**`
+- Ignores `### Heading` syntax - outputs raw `### text`
+- Ignores `- list item` syntax - outputs as plain text with `-`
+- Ignores `*italic*` and other inline formatting
 
-Add section content rendering between the hero and FAQs:
+---
 
-```tsx
-// Section configuration matching the editor
-const SECTION_CONFIG = [
-  { key: 'context', label: 'Client & Context' },
-  { key: 'problem', label: 'The Problem' },
-  { key: 'goals', label: 'Success Criteria' },
-  { key: 'solution', label: 'Our Solution' },
-  { key: 'implementation', label: 'Implementation' },
-  { key: 'results_narrative', label: 'Results' },
-  { key: 'next_steps', label: 'Next Steps' },
-];
+## Solution
 
-// Render each populated section
-{sectionContent && (
-  <section className="container-custom py-16">
-    <div className="max-w-3xl mx-auto prose prose-lg prose-invert">
-      {SECTION_CONFIG.map(({ key, label }) => {
-        const content = sectionContent[key];
-        if (!content || !content.content?.length) return null;
-        return (
-          <motion.div key={key}>
-            <h2>{label}</h2>
-            <ContentRenderer content={content} />
-          </motion.div>
-        );
-      })}
-    </div>
-  </section>
-)}
+Rewrite `markdownToTipTap` to properly convert:
+
+| Markdown Syntax | TipTap JSON Structure |
+|----------------|----------------------|
+| `**text**` | `{ type: 'text', text: 'text', marks: [{ type: 'bold' }] }` |
+| `*text*` | `{ type: 'text', text: 'text', marks: [{ type: 'italic' }] }` |
+| `### Heading` | `{ type: 'heading', attrs: { level: 3 }, content: [...] }` |
+| `- item` | `{ type: 'bulletList', content: [{ type: 'listItem', content: [...] }] }` |
+| `1. item` | `{ type: 'orderedList', content: [{ type: 'listItem', content: [...] }] }` |
+
+---
+
+## Implementation Details
+
+### 1. Parse Inline Marks
+
+Create a function to parse inline markdown and convert to TipTap text nodes with marks:
+
+```typescript
+function parseInlineMarks(text: string): JSONContent[] {
+  const nodes: JSONContent[] = [];
+  // Regex to match **bold**, *italic*, `code`, [link](url)
+  // Split and process each segment, applying appropriate marks
+}
 ```
 
-### 2. Convert FAQs to Accordion
+### 2. Handle Block-Level Elements
 
-Import the Accordion components and update the FAQs section:
+Update the main loop to detect and handle:
 
-```tsx
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+```typescript
+// Headings: ### text
+if (trimmed.match(/^#{1,6}\s/)) {
+  const level = trimmed.match(/^(#+)/)[1].length;
+  const text = trimmed.replace(/^#+\s*/, '');
+  content.push({
+    type: 'heading',
+    attrs: { level },
+    content: parseInlineMarks(text)
+  });
+}
 
-// Updated FAQs section
-{faqs.length > 0 && (
-  <section className="container-custom py-16">
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-8">Frequently Asked Questions</h2>
-      <Accordion type="single" collapsible className="w-full">
-        {faqs.map((faq, index) => (
-          <AccordionItem key={index} value={`faq-${index}`}>
-            <AccordionTrigger className="text-left text-lg">
-              {faq.question}
-            </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground">
-              {faq.answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
-  </section>
-)}
+// Bullet lists: - item
+if (trimmed.startsWith('- ')) {
+  // Collect consecutive list items into a bulletList node
+}
+
+// Ordered lists: 1. item
+if (trimmed.match(/^\d+\.\s/)) {
+  // Collect consecutive items into an orderedList node
+}
 ```
 
-### 3. Extract Section Content from Case Study Data
+### 3. Handle Nested Marks
 
-Add parsing of the `section_content` field from the case study:
+Support combined formatting like `**bold *and italic* text**`:
+- Parse outer marks first
+- Recursively process inner content
 
-```tsx
-// Parse section_content from the case study
-const sectionContent = (caseStudy as any).section_content as Record<string, JSONContent> | null;
-```
+---
 
-### 4. Update Section Ordering
+## Supported Markdown Syntax After Fix
 
-Ensure sections are rendered in the correct order:
-1. Hero (title, description, results stats)
-2. Section Content (Client & Context, Problem, Goals, Solution, Implementation, Results Narrative, Next Steps)
-3. Gallery (if images exist)
-4. FAQs (expandable accordion)
-5. Related Services
-6. Related Case Studies
+| Syntax | Renders As |
+|--------|-----------|
+| `**bold**` | **bold** |
+| `*italic*` | *italic* |
+| `***bold italic***` | ***bold italic*** |
+| `~~strikethrough~~` | ~~strikethrough~~ |
+| `` `code` `` | `code` |
+| `[link](url)` | clickable link |
+| `### Heading` | H3 heading |
+| `- item` | Bullet list |
+| `1. item` | Numbered list |
+| `> quote` | Blockquote |
 
 ---
 
@@ -114,48 +99,14 @@ Ensure sections are rendered in the correct order:
 
 | File | Changes |
 |------|---------|
-| `src/pages/CaseStudy.tsx` | Add section content rendering, convert FAQs to accordion |
+| `src/lib/markdown-parser.ts` | Rewrite `markdownToTipTap` function to properly parse markdown syntax |
 
 ---
 
-## Visual Structure After Fix
+## Edge Cases Handled
 
-```
-[Hero Section]
-  - Title, description, key results cards
-
-[Content Sections]
-  - H2: Client & Context
-    - (content)
-  - H2: The Problem
-    - (content)
-  - H2: Success Criteria
-    - (content)
-  - H2: Our Solution
-    - (content)
-  - H2: Implementation
-    - (content)
-  - H2: Results
-    - (content)
-  - H2: Next Steps
-    - (content)
-
-[Gallery] (if images)
-
-[FAQs - Expandable Accordion]
-  > How long did implementation take?
-  > What was the ROI?
-  > (etc.)
-
-[Related Services]
-[Related Case Studies]
-```
-
----
-
-## Technical Notes
-
-- Section content is stored as TipTap JSONContent per section
-- Only sections with actual content (content array length > 0) are rendered
-- FAQs use `type="single" collapsible` so only one expands at a time
-- The old `content` field rendering can be removed or kept as fallback for legacy case studies
+1. **Nested formatting**: `**bold *italic* bold**`
+2. **Escaped characters**: `\*not italic\*`
+3. **Empty lines**: Properly separate paragraphs
+4. **Mixed content**: Lists followed by paragraphs
+5. **Incomplete marks**: `**bold without closing` treated as plain text
