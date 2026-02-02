@@ -1,5 +1,5 @@
-import { useRef, useMemo } from 'react';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
+import { useRef, useMemo, useState, useCallback } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { useMousePosition } from '@/hooks/useMousePosition';
@@ -157,15 +157,46 @@ function Scene() {
 }
 
 export function FloatingGrid() {
+  const [contextLost, setContextLost] = useState(false);
+  
+  const handleCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
+    const canvas = gl.domElement;
+    
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      setContextLost(true);
+    };
+    
+    const handleContextRestored = () => {
+      setContextLost(false);
+    };
+    
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    canvas.addEventListener('webglcontextrestored', handleContextRestored);
+    
+    return () => {
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+    };
+  }, []);
+  
   return (
     <div className="absolute inset-0 z-0">
-      <Canvas
-        camera={{ position: [0, 0, 20], fov: 60 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <Scene />
-      </Canvas>
+      {!contextLost && (
+        <Canvas
+          key={contextLost ? 'lost' : 'active'}
+          camera={{ position: [0, 0, 20], fov: 60 }}
+          dpr={[1, 2]}
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: 'high-performance'
+          }}
+          onCreated={handleCreated}
+        >
+          <Scene />
+        </Canvas>
+      )}
       {/* Gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
     </div>

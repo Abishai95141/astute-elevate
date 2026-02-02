@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useMotionTemplate } from 'framer-motion';
 import { useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
@@ -108,7 +108,8 @@ export default function IndustryPage() {
   
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
-  const heroBlur = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
+  const heroBlurValue = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
+  const heroBlurFilter = useMotionTemplate`blur(${heroBlurValue}px)`;
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -190,7 +191,7 @@ export default function IndustryPage() {
           <div className="absolute inset-0 grid-pattern opacity-10" />
           
           <motion.div
-            style={{ filter: `blur(${heroBlur}px)` }}
+            style={{ filter: heroBlurFilter }}
             className="container-custom relative z-10 text-center"
           >
             {/* Floating icon */}
