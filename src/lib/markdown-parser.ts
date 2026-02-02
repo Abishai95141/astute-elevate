@@ -27,6 +27,10 @@ export interface ParsedCaseStudy {
   meta_title?: string;
   meta_description?: string;
   
+  // Related content for internal linking
+  related_services?: string[];
+  related_case_studies?: string[];
+  
   // Section content
   section_content?: {
     context?: JSONContent;
@@ -374,6 +378,8 @@ export function parseMarkdownCaseStudy(content: string): ParseResult {
     faqs: frontmatter.faqs as { question: string; answer: string }[] | undefined,
     meta_title: frontmatter.meta_title as string | undefined,
     meta_description: frontmatter.meta_description as string | undefined,
+    related_services: frontmatter.related_services as string[] | undefined,
+    related_case_studies: frontmatter.related_case_studies as string[] | undefined,
     section_content: Object.keys(sectionContent).length > 0 ? sectionContent : undefined,
   };
   
@@ -381,116 +387,263 @@ export function parseMarkdownCaseStudy(content: string): ParseResult {
 }
 
 /**
- * Example markdown template for case study import
+ * Instruction-focused markdown template for case study import
  */
 export const EXAMPLE_TEMPLATE = `---
-# CASE STUDY IMPORT FILE
-# Instructions:
-# 1. Fill in the frontmatter (between --- lines) with metadata
-# 2. Write content under each ## section heading
-# 3. Images must be added manually after import
-# 4. Display order and publish status are set in the CMS
+# ═══════════════════════════════════════════════════════════════════════════════
+# CASE STUDY IMPORT TEMPLATE
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# HOW TO USE THIS FILE:
+# 1. Fill in all fields between the --- markers (YAML frontmatter)
+# 2. Replace [INSTRUCTIONS] blocks with your actual content
+# 3. Delete instruction comments before importing
+# 4. Save as .md file and upload to the CMS
+#
+# WHAT GETS IMPORTED:
+# ✓ All frontmatter fields (metadata, results, FAQs, SEO)
+# ✓ All content sections (Client & Context, Problem, etc.)
+#
+# WHAT MUST BE ADDED MANUALLY AFTER IMPORT:
+# ✗ Thumbnail image
+# ✗ Gallery images
+# ✗ Display order
+# ✗ Publish status
+#
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# === REQUIRED FIELDS ===
-title: "AI-Powered Invoice Processing for Global Audit Firm"
-slug: "ai-invoice-processing-audit-firm"
-category: "AI Archives"
-short_description: "Reduced invoice processing time from 8 hours to 45 minutes using custom AI document extraction."
 
-# === METADATA ===
-industry: "Audit"
-client_type: "Big 4 Audit Firm (Global)"
+# ═══════════════════════════════════════════════════════════════════════════════
+# REQUIRED FIELDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Title of the case study (displayed as H1 on the page)
+title: ""
+
+# URL-friendly slug (lowercase, hyphens only, must be unique)
+# Example format: "client-name-project-type" or "industry-solution-type"
+slug: ""
+
+# Category - SELECT ONE of these exact values:
+#   - "Digital Branding"
+#   - "Operations"
+#   - "AI Archives"
+#   - "Software Dev"
+category: ""
+
+# Brief summary (1-2 sentences, shown on cards and in search results)
+# Keep under 160 characters for optimal SEO
+short_description: ""
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Industry - SELECT ONE of these exact values:
+#   - "Audit"
+#   - "Retail"
+#   - "Manufacturing"
+#   - "Healthcare"
+#   - "Fintech"
+#   - "Legal"
+#   - "Education"
+#   - "Other"
+industry: ""
+
+# Non-identifying client descriptor (no PII)
+# Examples: "Fortune 500 Retailer", "Mid-size Audit Firm (India)", "Global Logistics Provider"
+client_type: ""
+
+# Services provided - SELECT from these options (can select multiple):
+#   - "Document Digitization"
+#   - "AI Automation"
+#   - "Custom Software Development"
+#   - "Digital Transformation"
 services:
-  - "AI Automation"
-  - "Document Digitization"
+  - ""
+
+# Technologies used (free-form list)
+# Examples: Python, TensorFlow, React, Node.js, Supabase, AWS
 tech_stack:
-  - "Python"
-  - "TensorFlow"
-  - "React"
-  - "Supabase"
+  - ""
 
-# === KEY RESULTS (2-4 items) ===
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# KEY RESULTS (2-4 items recommended)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Each result should have:
+#   - label: What was measured (e.g., "Processing time reduced")
+#   - value: The result (e.g., "8 hours → 45 minutes", "99.2%", "$2.4M")
+#   - context: (optional) Additional context (e.g., "per 1,000 invoices", "annually")
+
 results:
-  - label: "Processing time reduced"
-    value: "8 hours → 45 minutes"
-    context: "per 1,000 invoices"
-  - label: "Accuracy improved"
-    value: "99.2%"
-    context: "vs 94% manual"
-  - label: "Cost savings"
-    value: "$2.4M annually"
+  - label: ""
+    value: ""
+    context: ""
+  - label: ""
+    value: ""
+    context: ""
 
-# === STATS (shown on card) ===
-stat_value: "94%"
-stat_metric: "Time Saved"
 
-# === SEO (optional - auto-generated if empty) ===
+# ═══════════════════════════════════════════════════════════════════════════════
+# CARD STATISTICS
+# ═══════════════════════════════════════════════════════════════════════════════
+# These appear prominently on the case study card in listings
+
+# The headline number/metric (e.g., "94%", "10x", "$2.4M")
+stat_value: ""
+
+# What the stat measures (e.g., "Time Saved", "ROI Increase", "Cost Reduction")
+stat_metric: ""
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SEO (Search Engine Optimization)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Custom page title (leave empty to auto-generate from title)
+# Recommended format: "Case Study: [Title] | Your Company"
+# Keep under 60 characters
 meta_title: ""
+
+# Meta description for search results
+# Summarize the case study in 1-2 sentences
+# Keep between 120-160 characters for optimal display
 meta_description: ""
 
-# === FAQs (optional, 3-5 recommended for SEO) ===
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RELATED CONTENT (for internal linking)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Note: Related content improves SEO through internal linking.
+# Use slugs (URL paths) to reference other content.
+
+# Related service page slugs - SELECT from:
+#   - "document-digitization"
+#   - "ai-automation"
+#   - "custom-software-development"
+#   - "digital-transformation"
+related_services:
+  - ""
+
+# Related case study slugs (enter slugs of 2-3 other published case studies)
+# Example: "healthcare-records-digitization"
+related_case_studies:
+  - ""
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FAQs (3-5 recommended for SEO)
+# ═══════════════════════════════════════════════════════════════════════════════
+# FAQs generate FAQ Schema markup which improves search visibility.
+# Write questions that potential clients might ask about this project.
+# Example questions:
+#   - "How long did the implementation take?"
+#   - "What was the ROI timeline?"
+#   - "How was data security handled?"
+#   - "Can this solution scale?"
+
 faqs:
-  - question: "How long did the implementation take?"
-    answer: "The full implementation took 12 weeks, including integration testing and staff training."
-  - question: "What was the ROI timeline?"
-    answer: "The client achieved positive ROI within 4 months of deployment."
+  - question: ""
+    answer: ""
+  - question: ""
+    answer: ""
+  - question: ""
+    answer: ""
+
 ---
 
 ## Client & Context
 
-A leading Big 4 audit firm with operations in 45 countries was struggling with manual invoice processing across their global offices. Their legacy systems couldn't handle the volume and variety of invoice formats they received daily.
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
+
+Provide background about the client without revealing confidential information.
+
+INCLUDE:
+- Industry and sector
+- Company size/scope (without naming)
+- Relevant context that led to this project
+
+DO NOT INCLUDE:
+- Client name or identifiable details
+- Specific locations (unless authorized)
+- Confidential business information
+
 
 ## Problem
 
-Manual invoice processing required 8+ hours per batch of 1,000 invoices, leading to delays in client reporting and increased operational costs. The firm was losing competitive advantage due to slow turnaround times.
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
 
-Key challenges included:
-- High error rates in manual data entry (6% average)
-- Inconsistent formatting across vendors
-- No real-time visibility into processing status
-- Difficulty scaling during peak audit seasons
+Describe the challenge or pain point the client faced.
+
+INCLUDE:
+- The specific business problem
+- Impact on operations/revenue/efficiency
+- Why existing solutions weren't working
+- Urgency or timeline pressures
+
 
 ## Goals / Success Criteria
 
-The client defined success as:
-- Reduce processing time by at least 80%
-- Maintain or improve accuracy (target: 98%+)
-- Enable real-time dashboard for processing status
-- Support at least 50 different invoice formats
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
+
+Define what success looked like for this project.
+
+INCLUDE:
+- Measurable targets (percentages, time savings, cost reduction)
+- Qualitative goals (user experience, reliability)
+- Must-have vs. nice-to-have requirements
+
 
 ## Solution
 
-We developed a custom AI pipeline combining OCR, NLP, and machine learning to automatically extract, validate, and categorize invoice data. The solution included:
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
 
-- Multi-format document parser supporting PDF, images, and scanned documents
-- Machine learning model trained on 50,000+ invoice samples
-- Real-time validation against vendor database
-- Dashboard with processing status and exception handling
+Explain how you solved the problem.
+
+INCLUDE:
+- Overall approach and strategy
+- Key technical decisions
+- Why this approach was chosen
+- Unique aspects of your solution
+
 
 ## Implementation
 
-Phase 1 (Weeks 1-4): Data collection and model training
-- Gathered 50,000+ sample invoices across all formats
-- Labeled training data with extraction specialists
-- Built initial ML model with 92% accuracy
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
 
-Phase 2 (Weeks 5-8): API development and integration
-- Developed RESTful API for integration with existing systems
-- Built real-time processing dashboard
-- Integrated with client's ERP system
+Describe the technical approach and process.
 
-Phase 3 (Weeks 9-12): Testing, optimization, and deployment
-- Conducted UAT with finance team
-- Optimized model to 99.2% accuracy
-- Deployed to production with 24/7 monitoring
+INCLUDE:
+- Project phases and timeline
+- Key milestones
+- Challenges overcome
+- Team collaboration approach
+
 
 ## Results Narrative
 
-Within the first month of deployment, the client processed over 50,000 invoices with 99.2% accuracy. The operations team reported significant reduction in overtime hours, and the finance department gained real-time visibility into invoice status for the first time.
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
 
-The system now handles seasonal peaks without additional staffing, processing up to 10,000 invoices per day during busy periods.
+Provide a detailed narrative of outcomes and impact.
+This complements the quantitative "results" in the frontmatter.
+
+INCLUDE:
+- Qualitative improvements
+- Client feedback/testimonials (if available)
+- Unexpected benefits
+- Long-term impact
+
 
 ## Next Steps / CTA
 
-The client is now exploring expansion of the AI system to handle expense reports and purchase orders. Contact us to learn how we can transform your document processing workflows.
+[INSTRUCTIONS - DELETE THIS BLOCK AND REPLACE WITH YOUR CONTENT]
+
+Describe future plans or include a call to action.
+
+OPTIONS:
+- Planned expansions of the solution
+- How similar results can be achieved for readers
+- Contact information or next steps
 `;

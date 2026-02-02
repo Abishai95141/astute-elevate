@@ -66,7 +66,7 @@ export function MarkdownImporter({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'case-study-template.md';
+    a.download = 'case-study-import-template.md';
     a.click();
     URL.revokeObjectURL(url);
   };
