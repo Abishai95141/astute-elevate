@@ -1,7 +1,9 @@
 {
   "rewrites": [
+    { "source": "/case-studies", "destination": "/" },
     { "source": "/case-studies/:path*", "destination": "/" },
     { "source": "/services/:path*", "destination": "/" },
+    { "source": "/industries/:path*", "destination": "/" },
     { "source": "/about", "destination": "/" },
     { "source": "/contact", "destination": "/" }
   ]

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Stethoscope, 
   Scale, 
@@ -76,10 +77,12 @@ function SectorCard({
   sector, 
   index,
   scrollProgress,
+  onNavigate,
 }: { 
   sector: typeof sectors[0]; 
   index: number;
   scrollProgress: any;
+  onNavigate: (slug: string) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -115,6 +118,7 @@ function SectorCard({
       viewport={{ once: true }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onNavigate(sector.id)}
       className={`relative group cursor-pointer ${
         sector.size === 'large' ? 'md:col-span-2' : ''
       }`}
@@ -194,12 +198,17 @@ function SectorCard({
 export function SectorProblems() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const navigate = useNavigate();
   
   // Scroll progress for parallax effect
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   });
+
+  const handleNavigate = (slug: string) => {
+    navigate(`/industries/${slug}`);
+  };
 
   return (
     <section id="sectors" className="snap-section section-padding relative overflow-hidden">
@@ -248,6 +257,7 @@ export function SectorProblems() {
               sector={sector} 
               index={index} 
               scrollProgress={scrollYProgress}
+              onNavigate={handleNavigate}
             />
           ))}
         </div>
