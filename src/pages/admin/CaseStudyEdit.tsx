@@ -8,6 +8,7 @@ import { TagInput } from '@/components/admin/TagInput';
 import { ResultsBuilder, type ResultItem } from '@/components/admin/ResultsBuilder';
 import { FAQBuilder, type FAQItem } from '@/components/admin/FAQBuilder';
 import { SectionContentEditor, getDefaultSectionContent, type SectionContent } from '@/components/admin/SectionContentEditor';
+import { MarkdownImporter } from '@/components/admin/MarkdownImporter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,9 +31,10 @@ import {
 } from '@/hooks/useCaseStudies';
 import { useAllServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, Loader2, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Eye, Upload } from 'lucide-react';
 import type { JSONContent } from '@tiptap/react';
 import type { Json } from '@/integrations/supabase/types';
+import type { ParsedCaseStudy } from '@/lib/markdown-parser';
 
 const CATEGORIES = [
   'Digital Branding',
@@ -91,6 +93,9 @@ export default function CaseStudyEdit() {
   const [relatedCaseStudyIds, setRelatedCaseStudyIds] = useState<string[]>([]);
   const [relatedServiceIds, setRelatedServiceIds] = useState<string[]>([]);
   const [sectionContent, setSectionContent] = useState<SectionContent>(getDefaultSectionContent());
+  
+  // Import dialog state
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   // Populate form when editing
   useEffect(() => {
@@ -212,6 +217,51 @@ export default function CaseStudyEdit() {
     );
   };
 
+  const handleMarkdownImport = (data: ParsedCaseStudy) => {
+    // Populate all form fields from imported data
+    setTitle(data.title);
+    setSlug(data.slug);
+    setCategory(data.category);
+    setShortDescription(data.short_description);
+    
+    // Metadata
+    if (data.industry) setIndustry(data.industry);
+    if (data.client_type) setClientType(data.client_type);
+    if (data.services) setSelectedServices(data.services);
+    if (data.tech_stack) setTechStack(data.tech_stack);
+    
+    // Stats
+    if (data.stat_value) setStatValue(data.stat_value);
+    if (data.stat_metric) setStatMetric(data.stat_metric);
+    
+    // Results
+    if (data.results) setResults(data.results);
+    
+    // FAQs
+    if (data.faqs) setFaqs(data.faqs);
+    
+    // SEO
+    if (data.meta_title) setMetaTitle(data.meta_title);
+    if (data.meta_description) setMetaDescription(data.meta_description);
+    
+    // Section content
+    if (data.section_content) {
+      setSectionContent({
+        context: data.section_content.context || { type: 'doc', content: [] },
+        problem: data.section_content.problem || { type: 'doc', content: [] },
+        goals: data.section_content.goals || { type: 'doc', content: [] },
+        solution: data.section_content.solution || { type: 'doc', content: [] },
+        implementation: data.section_content.implementation || { type: 'doc', content: [] },
+        results_narrative: data.section_content.results_narrative || { type: 'doc', content: [] },
+        next_steps: data.section_content.next_steps || { type: 'doc', content: [] },
+      });
+    }
+    
+    toast({ title: 'Markdown imported successfully!' });
+  };
+
+  const hasExistingFormData = Boolean(title || shortDescription || category);
+
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const otherCaseStudies = allCaseStudies?.filter((cs) => cs.id !== id) || [];
 
@@ -239,6 +289,10 @@ export default function CaseStudyEdit() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import MD
+            </Button>
             {!isNew && existingStudy?.is_published && (
               <Button variant="outline" asChild>
                 <a href={`/case-studies/${slug}`} target="_blank" rel="noopener noreferrer">
@@ -576,6 +630,14 @@ export default function CaseStudyEdit() {
           </section>
         </div>
       </div>
+      
+      {/* Markdown Import Dialog */}
+      <MarkdownImporter
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleMarkdownImport}
+        hasExistingData={hasExistingFormData}
+      />
     </AdminLayout>
   );
 }
