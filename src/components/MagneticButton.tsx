@@ -1,5 +1,5 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import React, { useRef, useState, useCallback, forwardRef } from 'react';
+import { motion, useSpring } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface MagneticButtonProps {
@@ -10,14 +10,16 @@ interface MagneticButtonProps {
   href?: string;
 }
 
-export function MagneticButton({
-  children,
-  className,
-  variant = 'primary',
-  onClick,
-  href,
-}: MagneticButtonProps) {
-  const ref = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
+export const MagneticButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, MagneticButtonProps>(
+  function MagneticButton({
+    children,
+    className,
+    variant = 'primary',
+    onClick,
+    href,
+  }, forwardedRef) {
+  const internalRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
+  const ref = (forwardedRef as React.RefObject<HTMLButtonElement | HTMLAnchorElement>) || internalRef;
   const [isHovered, setIsHovered] = useState(false);
 
   const x = useSpring(0, { stiffness: 150, damping: 15 });
@@ -80,4 +82,4 @@ export function MagneticButton({
       )}
     </Component>
   );
-}
+});

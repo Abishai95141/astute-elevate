@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { FloatingGrid } from './FloatingGrid';
 import { MagneticButton } from './MagneticButton';
 
@@ -13,7 +13,8 @@ export function Hero() {
   });
 
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const blur = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
+  const blurValue = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
+  const blurFilter = useMotionTemplate`blur(${blurValue}px)`;
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
 
   const scrollToContact = () => {
@@ -40,7 +41,7 @@ export function Hero() {
 
       {/* Content */}
       <motion.div
-        style={{ opacity, y, filter: blur.get() > 0 ? `blur(${blur.get()}px)` : 'none' }}
+        style={{ opacity, y, filter: blurFilter }}
         className="relative z-10 container-custom text-center px-4"
       >
         {/* Headline */}

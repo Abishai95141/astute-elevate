@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { Navbar } from '@/components/Navbar';
@@ -14,6 +15,12 @@ import { useSecretSequence } from '@/hooks/useSecretSequence';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
+  
+  // Reset scroll position on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.key]);
   
   // Enable secret keyboard sequence to access admin
   useSecretSequence();
