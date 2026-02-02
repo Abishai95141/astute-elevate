@@ -1,179 +1,279 @@
 
 
-# Add CMS Fields to Case Study Editor
+# Add Markdown Import Feature for Case Studies
 
-This plan adds the new SEO fields to the admin case study editor form and fixes the secret sequence.
-
----
-
-## Summary of Findings
-
-**Sitemap Edge Function**: Working correctly and returns valid XML with all published pages:
-- Static: `/`, `/case-studies`, `/about`, `/contact`
-- Services: `/services/document-digitization`, `/services/ai-automation`, `/services/custom-software-development`, `/services/digital-transformation`
-- Case Studies: 2 published case studies
-
-**Secret Sequence Issue**: Current sequence is `shemanthika292504` but should be `shemanthika@292504` (with @ symbol).
+This plan adds an "Import from Markdown" button that allows editors to quickly populate all case study fields from a structured `.md` file. Images and display order are excluded from import.
 
 ---
+
+## Implementation Overview
+
+### 1. Create MarkdownImporter Component
+
+**File: `src/components/admin/MarkdownImporter.tsx`**
+
+A dialog-based component with:
+- File input accepting `.md` files
+- Example markdown template with download button
+- Import button that parses the file and returns structured data
+- Clear instructions and validation feedback
+
+### 2. Markdown File Structure
+
+The markdown file uses YAML frontmatter for metadata fields and markdown sections for content:
+
+```markdown
+---
+# CASE STUDY IMPORT FILE
+# Instructions:
+# 1. Fill in the frontmatter (between --- lines) with metadata
+# 2. Write content under each ## section heading
+# 3. Images must be added manually after import
+# 4. Display order and publish status are set in the CMS
+
+# === REQUIRED FIELDS ===
+title: "AI-Powered Invoice Processing for Global Audit Firm"
+slug: "ai-invoice-processing-audit-firm"
+category: "AI Archives"  # Options: Digital Branding, Operations, AI Archives, Software Dev
+short_description: "Reduced invoice processing time from 8 hours to 45 minutes using custom AI document extraction."
+
+# === METADATA ===
+industry: "Audit"  # Options: Audit, Retail, Manufacturing, Healthcare, Fintech, Legal, Education, Other
+client_type: "Big 4 Audit Firm (Global)"
+services:
+  - "AI Automation"
+  - "Document Digitization"
+tech_stack:
+  - "Python"
+  - "TensorFlow"
+  - "React"
+  - "Supabase"
+
+# === KEY RESULTS (2-4 items) ===
+results:
+  - label: "Processing time reduced"
+    value: "8 hours → 45 minutes"
+    context: "per 1,000 invoices"
+  - label: "Accuracy improved"
+    value: "99.2%"
+    context: "vs 94% manual"
+  - label: "Cost savings"
+    value: "$2.4M annually"
+
+# === STATS (shown on card) ===
+stat_value: "94%"
+stat_metric: "Time Saved"
+
+# === SEO (optional - auto-generated if empty) ===
+meta_title: ""
+meta_description: ""
+
+# === FAQs (optional, 3-5 recommended for SEO) ===
+faqs:
+  - question: "How long did the implementation take?"
+    answer: "The full implementation took 12 weeks, including integration testing and staff training."
+  - question: "What was the ROI timeline?"
+    answer: "The client achieved positive ROI within 4 months of deployment."
+---
+
+## Client & Context
+
+Provide background about the client without revealing confidential information.
+Focus on their industry, size, and relevant context for the case study.
+
+Example: A leading Big 4 audit firm with operations in 45 countries was struggling with manual invoice processing across their global offices.
+
+## Problem
+
+Describe the challenge or pain point the client faced.
+Be specific about the business impact and urgency.
+
+Example: Manual invoice processing required 8+ hours per batch of 1,000 invoices, leading to delays in client reporting and increased operational costs.
+
+## Goals / Success Criteria
+
+Define what success looked like for this project.
+Include measurable targets where possible.
+
+Example:
+- Reduce processing time by at least 80%
+- Maintain or improve accuracy (target: 98%+)
+- Enable real-time dashboard for processing status
+
+## Solution
+
+Explain how you solved the problem.
+Focus on the approach and key decisions, not just the technology.
+
+Example: We developed a custom AI pipeline combining OCR, NLP, and machine learning to automatically extract, validate, and categorize invoice data.
 
 ## Implementation
 
-### 1. Fix Secret Sequence (useSecretSequence.ts)
+Describe the technical approach and process.
+Include timeline, phases, and any challenges overcome.
 
-Update the secret sequence from `shemanthika292504` to `shemanthika@292504`:
+Example: 
+Phase 1 (Weeks 1-4): Data collection and model training
+Phase 2 (Weeks 5-8): API development and integration
+Phase 3 (Weeks 9-12): Testing, optimization, and deployment
 
-```
-const SECRET_SEQUENCE = 'shemanthika@292504';
-```
+## Results Narrative
 
----
+Provide a detailed narrative of the outcomes and impact.
+This complements the quantitative results in the frontmatter.
 
-### 2. Add New CMS Fields to CaseStudyEdit.tsx
+Example: Within the first month of deployment, the client processed over 50,000 invoices with 99.2% accuracy. The operations team reported significant reduction in overtime hours.
 
-#### 2.1 New State Variables
+## Next Steps / CTA
 
-Add state for all new fields:
-- `industry` (string)
-- `selectedServices` (string[]) - service tags
-- `techStack` (string[]) - tech tags
-- `results` (array of {label, value, context})
-- `clientType` (string)
-- `faqs` (array of {question, answer})
-- `relatedCaseStudyIds` (string[])
-- `relatedServiceIds` (string[])
-- `sectionContent` (object with keys for each section)
+Describe future plans or include a call to action.
 
-#### 2.2 Industry Field (Single Select)
-
-Add dropdown with predefined industries:
-- Audit
-- Retail
-- Manufacturing
-- Healthcare
-- Fintech
-- Legal
-- Education
-- Other
-
-#### 2.3 Services Multi-Select
-
-Fetch available services from database and display as checkboxes:
-- Document Digitization
-- AI Automation
-- Custom Software Development
-- Digital Transformation
-
-#### 2.4 Tech Stack Tags
-
-Tag input component allowing multiple technology entries (React, Node.js, Supabase, etc.)
-
-#### 2.5 Results Array Builder
-
-Dynamic form for 2-4 result items:
-- Label (e.g., "Processing time reduced")
-- Value (e.g., "8 hours -> 45 minutes")
-- Context (optional, e.g., "per 1,000 invoices")
-
-Add/remove buttons for managing entries.
-
-#### 2.6 Client Type Field
-
-Simple text input for non-PII client description (e.g., "Mid-size audit firm (India)")
-
-#### 2.7 FAQs Array Builder
-
-Dynamic form for Q/A pairs:
-- Question (text)
-- Answer (textarea)
-
-Add/remove buttons for managing entries (recommended 3-5).
-
-#### 2.8 Related Case Studies Multi-Select
-
-Fetch all other case studies and allow selecting 2-3 related ones.
-
-#### 2.9 Related Services Multi-Select
-
-Fetch all services and allow selecting relevant ones for cross-linking.
-
-#### 2.10 Section Content Editors
-
-Structured editors for semantic H2 sections:
-- Client & Context
-- Problem
-- Goals / Success Criteria
-- Solution
-- Implementation
-- Results Narrative
-- Next Steps / CTA
-
-Each section uses a simplified RichTextEditor (no headings allowed in editor).
-
----
-
-### 3. Form Sections Layout
-
-Organize the form into logical sections:
-
-```
-[Thumbnail Section]
-[Basic Information] - title, slug, category, description, stats
-[Metadata] - industry, client type, services, tech stack
-[Results] - array builder for key metrics
-[Section Content] - structured editors for each H2 section
-[FAQs] - array builder for Q/A pairs
-[Related Content] - related case studies & services
-[Gallery]
-[SEO] - meta title, description
-[Publishing] - published toggle, display order
+Example: The client is now exploring expansion of the AI system to handle expense reports and purchase orders. Contact us to learn how we can transform your document processing.
 ```
 
 ---
 
-### 4. Save Handler Updates
+### 3. Parsing Logic
 
-Update `handleSave` function to include all new fields in the save payload:
-- `industry`
-- `services`
-- `tech_stack`
-- `results`
-- `client_type`
-- `faqs`
-- `related_case_study_ids`
-- `related_service_ids`
-- `section_content`
+The import function will:
+
+1. **Extract frontmatter** using regex to find content between `---` markers
+2. **Parse YAML** frontmatter into structured fields
+3. **Extract sections** by splitting on `## ` headings
+4. **Convert markdown to TipTap JSON** for rich text sections
+5. **Validate required fields** (title, slug, category, short_description)
+6. **Return structured data** matching the form state types
+
+### 4. Section Mapping
+
+Markdown headings map to `sectionContent` keys:
+
+| Markdown Heading | sectionContent Key |
+|-----------------|-------------------|
+| `## Client & Context` | `context` |
+| `## Problem` | `problem` |
+| `## Goals / Success Criteria` | `goals` |
+| `## Solution` | `solution` |
+| `## Implementation` | `implementation` |
+| `## Results Narrative` | `results_narrative` |
+| `## Next Steps / CTA` | `next_steps` |
+
+### 5. UI Integration
+
+Add import button to the CaseStudyEdit header (near Save/Publish buttons):
+
+```tsx
+<Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+  <Upload className="h-4 w-4 mr-2" />
+  Import MD
+</Button>
+```
+
+The dialog contains:
+- Instructions text
+- "Download Example Template" button
+- File drop zone / file input
+- Preview of parsed data (optional)
+- "Import" and "Cancel" buttons
+
+### 6. Import Handler
+
+When a file is imported:
+
+1. Parse the markdown file
+2. Show confirmation if form already has data ("This will overwrite existing data")
+3. Populate all form state variables except:
+   - `thumbnailUrl` / `thumbnailAlt` (images added manually)
+   - `displayOrder` (set in CMS)
+   - `isPublished` (always false on import)
+   - `relatedCaseStudyIds` / `relatedServiceIds` (require ID lookups)
 
 ---
 
-### 5. Load Existing Data
+## Files to Create
 
-Update the `useEffect` that populates the form to also load:
-- All new fields from `existingStudy`
-- Parse JSONB fields correctly (results, faqs, section_content)
-
----
+| File | Purpose |
+|------|---------|
+| `src/components/admin/MarkdownImporter.tsx` | Dialog component with file parsing |
+| `src/lib/markdown-parser.ts` | Parsing utilities for frontmatter and sections |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/hooks/useSecretSequence.ts` | Change sequence to include @ symbol |
-| `src/pages/admin/CaseStudyEdit.tsx` | Add all new form fields and sections |
-
-## New Helper Components (inline in CaseStudyEdit)
-
-- `TagInput` - reusable component for tech stack and similar tag arrays
-- `ResultsBuilder` - dynamic form for result entries
-- `FAQBuilder` - dynamic form for FAQ entries
-- `SectionEditor` - wrapper around RichTextEditor for each H2 section
+| `src/pages/admin/CaseStudyEdit.tsx` | Add import button and dialog integration |
 
 ---
 
-## Technical Notes
+## Technical Details
 
-- Use `usePublishedServices` hook to fetch available services for the multi-select
-- Use `useAllCaseStudies` hook to populate related case studies picker
-- JSONB fields (results, faqs, section_content) should be properly typed and validated before save
-- The form already has responsive grid layouts - maintain this pattern for new sections
+### Frontmatter Parsing
+
+Use a simple regex-based YAML parser (no external dependency needed):
+
+```typescript
+function parseFrontmatter(content: string) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  
+  const yaml = match[1];
+  // Parse YAML key-value pairs, arrays, and nested objects
+  return parseYaml(yaml);
+}
+```
+
+### Markdown to TipTap JSON
+
+Convert markdown paragraphs to TipTap's `JSONContent` format:
+
+```typescript
+function markdownToTipTap(markdown: string): JSONContent {
+  const paragraphs = markdown.split('\n\n').filter(p => p.trim());
+  return {
+    type: 'doc',
+    content: paragraphs.map(p => ({
+      type: 'paragraph',
+      content: [{ type: 'text', text: p.trim() }]
+    }))
+  };
+}
+```
+
+### Validation
+
+Display errors for:
+- Missing required fields (title, slug, category, short_description)
+- Invalid category value
+- Invalid industry value
+- Malformed YAML
+
+---
+
+## User Flow
+
+1. User clicks "Import MD" button
+2. Dialog opens with instructions and example template
+3. User downloads template, fills it out
+4. User drags/selects the `.md` file
+5. System validates and shows preview
+6. User clicks "Import" to populate form
+7. User manually adds thumbnail image
+8. User reviews and saves/publishes
+
+---
+
+## Example Template Download
+
+The component includes a button to download the example template:
+
+```typescript
+const downloadTemplate = () => {
+  const blob = new Blob([EXAMPLE_TEMPLATE], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'case-study-template.md';
+  a.click();
+};
+```
 
