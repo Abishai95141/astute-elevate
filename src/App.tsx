@@ -16,6 +16,8 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CaseStudies from "./pages/admin/CaseStudies";
 import CaseStudyEdit from "./pages/admin/CaseStudyEdit";
+import ContactMessages from "./pages/admin/ContactMessages";
+import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
 import ChennaiPage from "./pages/ChennaiPage";
 import NeighborhoodPage from "./pages/NeighborhoodPage";
 
@@ -44,6 +46,8 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/messages" element={<ContactMessages />} />
+            <Route path="/admin/subscribers" element={<NewsletterSubscribers />} />
             <Route path="/admin/case-studies" element={<CaseStudies />} />
             <Route path="/admin/case-studies/:id" element={<CaseStudyEdit />} />
             

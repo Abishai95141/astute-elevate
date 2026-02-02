@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useUnreadMessageCount } from '@/hooks/useContactMessages';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
@@ -8,7 +9,9 @@ import {
   LogOut, 
   Loader2,
   Menu,
-  X 
+  X,
+  MessageSquare,
+  Mail 
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -22,6 +25,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const unreadCount = useUnreadMessageCount();
 
   useEffect(() => {
     if (!isInitializing && !user) {
@@ -45,6 +49,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
+    { href: '/admin/subscribers', icon: Mail, label: 'Subscribers' },
     { href: '/admin/case-studies', icon: FileText, label: 'Case Studies' },
   ];
 
@@ -92,6 +98,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             >
               <item.icon className="h-4 w-4" />
               {item.label}
+              {'badge' in item && item.badge > 0 && (
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           ))}
         </nav>

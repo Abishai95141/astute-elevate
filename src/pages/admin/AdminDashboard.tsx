@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAllCaseStudies } from '@/hooks/useCaseStudies';
+import { useContactMessages } from '@/hooks/useContactMessages';
+import { useNewsletterSubscribers } from '@/hooks/useNewsletterSubscribers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Eye, EyeOff, Plus, ArrowRight } from 'lucide-react';
+import { FileText, Eye, EyeOff, Plus, ArrowRight, MessageSquare, Users } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { data: caseStudies = [] } = useAllCaseStudies();
+  const { messages, unreadCount } = useContactMessages();
+  const { totalCount: subscriberCount } = useNewsletterSubscribers();
 
   const publishedCount = caseStudies.filter((s) => s.is_published).length;
   const draftCount = caseStudies.filter((s) => !s.is_published).length;
@@ -21,12 +25,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Case Studies
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Case Studies</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -51,6 +53,33 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{draftCount}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Messages</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {messages.length}
+              {unreadCount > 0 && (
+                <span className="ml-2 text-sm font-normal text-destructive">
+                  ({unreadCount} new)
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{subscriberCount}</div>
           </CardContent>
         </Card>
       </div>
