@@ -306,10 +306,10 @@ export function Portfolio() {
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-t border-b border-border/50">
           {[
-            { value: '50+', label: 'Projects Completed' },
-            { value: '30+', label: 'Happy Clients' },
-            { value: '5+', label: 'Years Experience' },
-            { value: '99%', label: 'Client Satisfaction' },
+            { value: '30+', label: 'Projects Completed' },
+            { value: '10+', label: 'Happy Clients' },
+            { value: '3+', label: 'Years Experience' },
+            { value: '100%', label: 'Client Satisfaction' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
