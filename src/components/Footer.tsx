@@ -14,6 +14,13 @@ const footerLinks = {
     { name: 'Case Studies', href: '/case-studies' },
     { name: 'Contact', href: '/contact' },
   ],
+  serviceAreas: [
+    { name: 'Chennai', href: '/chennai' },
+    { name: 'Anna Nagar', href: '/chennai/anna-nagar' },
+    { name: 'Ambattur', href: '/chennai/ambattur' },
+    { name: 'Velachery', href: '/chennai/velachery' },
+    { name: 'T. Nagar', href: '/chennai/t-nagar' },
+  ],
 };
 
 export function Footer() {
@@ -34,7 +41,7 @@ export function Footer() {
   return (
     <footer className="snap-section relative border-t border-border/50 bg-card/50">
       <div className="container-custom py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
             <motion.div whileHover={{ scale: 1.02 }}>
@@ -102,6 +109,25 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    className="text-muted-foreground hover:text-foreground transition-colors text-sm link-underline"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Service Areas */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+              Service Areas
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.serviceAreas.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
