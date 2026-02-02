@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SECRET_SEQUENCE = 'shemanthika292504';
+const SECRET_SEQUENCE = 'shemanthika@292504';
 
 export function useSecretSequence() {
   const navigate = useNavigate();
