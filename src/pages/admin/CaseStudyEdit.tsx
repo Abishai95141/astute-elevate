@@ -4,11 +4,16 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { GalleryManager } from '@/components/admin/GalleryManager';
+import { TagInput } from '@/components/admin/TagInput';
+import { ResultsBuilder, type ResultItem } from '@/components/admin/ResultsBuilder';
+import { FAQBuilder, type FAQItem } from '@/components/admin/FAQBuilder';
+import { SectionContentEditor, getDefaultSectionContent, type SectionContent } from '@/components/admin/SectionContentEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -20,8 +25,10 @@ import {
   useCaseStudyById,
   useCreateCaseStudy,
   useUpdateCaseStudy,
+  useAllCaseStudies,
   generateSlug,
 } from '@/hooks/useCaseStudies';
+import { useAllServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Save, Loader2, Eye } from 'lucide-react';
 import type { JSONContent } from '@tiptap/react';
@@ -34,6 +41,17 @@ const CATEGORIES = [
   'Software Dev',
 ];
 
+const INDUSTRIES = [
+  'Audit',
+  'Retail',
+  'Manufacturing',
+  'Healthcare',
+  'Fintech',
+  'Legal',
+  'Education',
+  'Other',
+];
+
 export default function CaseStudyEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,10 +61,12 @@ export default function CaseStudyEdit() {
   const { data: existingStudy, isLoading: isLoadingStudy } = useCaseStudyById(
     isNew ? undefined : id
   );
+  const { data: allCaseStudies } = useAllCaseStudies();
+  const { data: allServices } = useAllServices();
   const createMutation = useCreateCaseStudy();
   const updateMutation = useUpdateCaseStudy();
 
-  // Form state
+  // Basic form state
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('');
@@ -60,6 +80,17 @@ export default function CaseStudyEdit() {
   const [displayOrder, setDisplayOrder] = useState(0);
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
+
+  // New SEO fields
+  const [industry, setIndustry] = useState('');
+  const [clientType, setClientType] = useState('');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [techStack, setTechStack] = useState<string[]>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
+  const [faqs, setFaqs] = useState<FAQItem[]>([]);
+  const [relatedCaseStudyIds, setRelatedCaseStudyIds] = useState<string[]>([]);
+  const [relatedServiceIds, setRelatedServiceIds] = useState<string[]>([]);
+  const [sectionContent, setSectionContent] = useState<SectionContent>(getDefaultSectionContent());
 
   // Populate form when editing
   useEffect(() => {
@@ -77,6 +108,21 @@ export default function CaseStudyEdit() {
       setDisplayOrder(existingStudy.display_order);
       setMetaTitle(existingStudy.meta_title || '');
       setMetaDescription(existingStudy.meta_description || '');
+      
+      // New fields
+      setIndustry(existingStudy.industry || '');
+      setClientType(existingStudy.client_type || '');
+      setSelectedServices(existingStudy.services || []);
+      setTechStack(existingStudy.tech_stack || []);
+      setResults(Array.isArray(existingStudy.results) ? existingStudy.results as unknown as ResultItem[] : []);
+      setFaqs(Array.isArray(existingStudy.faqs) ? existingStudy.faqs as unknown as FAQItem[] : []);
+      setRelatedCaseStudyIds(existingStudy.related_case_study_ids || []);
+      setRelatedServiceIds(existingStudy.related_service_ids || []);
+      setSectionContent(
+        existingStudy.section_content && typeof existingStudy.section_content === 'object' && !Array.isArray(existingStudy.section_content)
+          ? existingStudy.section_content as unknown as SectionContent
+          : getDefaultSectionContent()
+      );
     }
   }, [existingStudy]);
 
@@ -112,6 +158,16 @@ export default function CaseStudyEdit() {
       meta_title: metaTitle || null,
       meta_description: metaDescription || null,
       display_order: displayOrder,
+      // New fields
+      industry: industry || null,
+      client_type: clientType || null,
+      services: selectedServices,
+      tech_stack: techStack,
+      results: results as unknown as Json,
+      faqs: faqs as unknown as Json,
+      related_case_study_ids: relatedCaseStudyIds,
+      related_service_ids: relatedServiceIds,
+      section_content: sectionContent as unknown as Json,
     };
 
     try {
@@ -132,7 +188,32 @@ export default function CaseStudyEdit() {
     }
   };
 
+  const toggleRelatedCaseStudy = (caseStudyId: string) => {
+    setRelatedCaseStudyIds((prev) =>
+      prev.includes(caseStudyId)
+        ? prev.filter((id) => id !== caseStudyId)
+        : [...prev, caseStudyId]
+    );
+  };
+
+  const toggleRelatedService = (serviceId: string) => {
+    setRelatedServiceIds((prev) =>
+      prev.includes(serviceId)
+        ? prev.filter((id) => id !== serviceId)
+        : [...prev, serviceId]
+    );
+  };
+
+  const toggleServiceTag = (serviceTitle: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(serviceTitle)
+        ? prev.filter((s) => s !== serviceTitle)
+        : [...prev, serviceTitle]
+    );
+  };
+
   const isSaving = createMutation.isPending || updateMutation.isPending;
+  const otherCaseStudies = allCaseStudies?.filter((cs) => cs.id !== id) || [];
 
   if (!isNew && isLoadingStudy) {
     return (
@@ -281,14 +362,153 @@ export default function CaseStudyEdit() {
             </div>
           </section>
 
-          {/* Content Editor */}
+          {/* Metadata Section */}
           <section className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Content</h2>
+            <h2 className="text-lg font-semibold mb-4">Metadata</h2>
+            <div className="grid gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="industry">Industry</Label>
+                  <Select value={industry} onValueChange={setIndustry}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRIES.map((ind) => (
+                        <SelectItem key={ind} value={ind}>
+                          {ind}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="clientType">Client Type</Label>
+                  <Input
+                    id="clientType"
+                    value={clientType}
+                    onChange={(e) => setClientType(e.target.value)}
+                    placeholder="e.g., Mid-size audit firm (India)"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Services</Label>
+                <div className="flex flex-wrap gap-3">
+                  {allServices?.map((service) => (
+                    <div key={service.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`service-${service.id}`}
+                        checked={selectedServices.includes(service.title)}
+                        onCheckedChange={() => toggleServiceTag(service.title)}
+                      />
+                      <label
+                        htmlFor={`service-${service.id}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {service.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Tech Stack</Label>
+                <TagInput
+                  value={techStack}
+                  onChange={setTechStack}
+                  placeholder="Add technology (e.g., React, Node.js)"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Results Section */}
+          <section className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Results / Key Metrics</h2>
+            <ResultsBuilder value={results} onChange={setResults} />
+          </section>
+
+          {/* Section Content */}
+          <section className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Section Content</h2>
+            <SectionContentEditor value={sectionContent} onChange={setSectionContent} />
+          </section>
+
+          {/* Legacy Content Editor */}
+          <section className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Additional Content (Legacy)</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Use this for any content that doesn't fit the structured sections above.
+            </p>
             <RichTextEditor
               content={content}
               onChange={setContent}
-              placeholder="Write your case study content here..."
+              placeholder="Write additional content here..."
             />
+          </section>
+
+          {/* FAQs */}
+          <section className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">FAQs</h2>
+            <FAQBuilder value={faqs} onChange={setFaqs} />
+          </section>
+
+          {/* Related Content */}
+          <section className="bg-card border border-border rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Related Content</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <Label className="mb-2 block">Related Case Studies</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Select 2-3 related case studies for cross-linking.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {otherCaseStudies.map((cs) => (
+                    <div key={cs.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`related-cs-${cs.id}`}
+                        checked={relatedCaseStudyIds.includes(cs.id)}
+                        onCheckedChange={() => toggleRelatedCaseStudy(cs.id)}
+                      />
+                      <label
+                        htmlFor={`related-cs-${cs.id}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {cs.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Related Services</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Select services to show in the "Related Services" section.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {allServices?.map((service) => (
+                    <div key={service.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`related-svc-${service.id}`}
+                        checked={relatedServiceIds.includes(service.id)}
+                        onCheckedChange={() => toggleRelatedService(service.id)}
+                      />
+                      <label
+                        htmlFor={`related-svc-${service.id}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {service.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Gallery */}
