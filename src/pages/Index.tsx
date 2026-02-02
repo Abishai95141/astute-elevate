@@ -10,10 +10,13 @@ import { SectorProblems } from '@/components/SectorProblems';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
+import { useSecretSequence } from '@/hooks/useSecretSequence';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-
+  
+  // Enable secret keyboard sequence to access admin
+  useSecretSequence();
   return (
     <>
       <SEOHead
