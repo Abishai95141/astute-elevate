@@ -1,12 +1,19 @@
 import type { JSONContent } from '@tiptap/react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { processTipTapMarkdown } from '@/lib/tiptap-markdown-processor';
 
 interface ContentRendererProps {
   content: JSONContent;
 }
 
 export function ContentRenderer({ content }: ContentRendererProps) {
-  if (!content || !content.content) {
+  // Process the content to convert any markdown syntax to proper TipTap structure
+  const processedContent = useMemo(() => {
+    if (!content) return null;
+    return processTipTapMarkdown(content);
+  }, [content]);
+
+  if (!processedContent || !processedContent.content) {
     return null;
   }
 
@@ -153,7 +160,7 @@ export function ContentRenderer({ content }: ContentRendererProps) {
 
   return (
     <div className="content-renderer">
-      {content.content.map((node, index) => renderNode(node, index))}
+      {processedContent.content.map((node, index) => renderNode(node, index))}
     </div>
   );
 }
