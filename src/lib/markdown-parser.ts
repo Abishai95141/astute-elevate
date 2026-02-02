@@ -237,44 +237,225 @@ function parseFrontmatter(content: string): Record<string, unknown> | null {
 }
 
 /**
+ * Parse inline markdown marks (bold, italic, code, links, strikethrough)
+ */
+function parseInlineMarks(text: string): JSONContent[] {
+  if (!text) return [];
+  
+  const nodes: JSONContent[] = [];
+  
+  // Regex patterns for inline marks - order matters (longer patterns first)
+  const patterns = [
+    { regex: /\*\*\*(.+?)\*\*\*/g, marks: ['bold', 'italic'] }, // ***bold italic***
+    { regex: /\*\*(.+?)\*\*/g, marks: ['bold'] },               // **bold**
+    { regex: /\*(.+?)\*/g, marks: ['italic'] },                 // *italic*
+    { regex: /~~(.+?)~~/g, marks: ['strike'] },                 // ~~strikethrough~~
+    { regex: /`(.+?)`/g, marks: ['code'] },                     // `code`
+    { regex: /\[(.+?)\]\((.+?)\)/g, marks: ['link'], isLink: true }, // [text](url)
+  ];
+  
+  // Simple approach: process text segment by segment
+  let remaining = text;
+  let lastIndex = 0;
+  
+  // Find all matches with their positions
+  interface Match {
+    start: number;
+    end: number;
+    content: string;
+    marks: { type: string; attrs?: Record<string, string> }[];
+  }
+  
+  const matches: Match[] = [];
+  
+  for (const pattern of patterns) {
+    pattern.regex.lastIndex = 0;
+    let match;
+    while ((match = pattern.regex.exec(text)) !== null) {
+      // Check if this position is already covered by a previous match
+      const start = match.index;
+      const end = match.index + match[0].length;
+      const isOverlapping = matches.some(m => 
+        (start >= m.start && start < m.end) || (end > m.start && end <= m.end)
+      );
+      
+      if (!isOverlapping) {
+        const markObjects = pattern.marks.map(m => ({ type: m }));
+        
+        if ((pattern as any).isLink) {
+          matches.push({
+            start,
+            end,
+            content: match[1],
+            marks: [{ type: 'link', attrs: { href: match[2] } }]
+          });
+        } else {
+          matches.push({
+            start,
+            end,
+            content: match[1],
+            marks: markObjects
+          });
+        }
+      }
+    }
+  }
+  
+  // Sort matches by position
+  matches.sort((a, b) => a.start - b.start);
+  
+  // Build nodes from matches and plain text
+  let currentPos = 0;
+  for (const match of matches) {
+    // Add plain text before this match
+    if (match.start > currentPos) {
+      const plainText = text.slice(currentPos, match.start);
+      if (plainText) {
+        nodes.push({ type: 'text', text: plainText });
+      }
+    }
+    
+    // Add the marked text
+    nodes.push({
+      type: 'text',
+      text: match.content,
+      marks: match.marks
+    });
+    
+    currentPos = match.end;
+  }
+  
+  // Add remaining plain text
+  if (currentPos < text.length) {
+    const plainText = text.slice(currentPos);
+    if (plainText) {
+      nodes.push({ type: 'text', text: plainText });
+    }
+  }
+  
+  // If no matches found, return the whole text as plain
+  if (nodes.length === 0 && text) {
+    nodes.push({ type: 'text', text });
+  }
+  
+  return nodes;
+}
+
+/**
  * Convert markdown text to TipTap JSONContent format
  */
 export function markdownToTipTap(markdown: string): JSONContent {
   const lines = markdown.trim().split('\n');
   const content: JSONContent[] = [];
-  let currentParagraph: string[] = [];
+  let i = 0;
   
-  const flushParagraph = () => {
-    if (currentParagraph.length > 0) {
-      const text = currentParagraph.join(' ').trim();
-      if (text) {
-        content.push({
-          type: 'paragraph',
-          content: [{ type: 'text', text }]
-        });
-      }
-      currentParagraph = [];
-    }
-  };
-  
-  for (const line of lines) {
+  while (i < lines.length) {
+    const line = lines[i];
     const trimmed = line.trim();
     
+    // Skip empty lines
     if (trimmed === '') {
-      flushParagraph();
-    } else if (trimmed.startsWith('- ')) {
-      // List item - for now just treat as paragraph
-      flushParagraph();
+      i++;
+      continue;
+    }
+    
+    // Headings: # ## ### #### ##### ######
+    const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = headingMatch[2];
+      content.push({
+        type: 'heading',
+        attrs: { level },
+        content: parseInlineMarks(text)
+      });
+      i++;
+      continue;
+    }
+    
+    // Blockquote: > text
+    if (trimmed.startsWith('> ')) {
+      const quoteLines: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith('> ')) {
+        quoteLines.push(lines[i].trim().slice(2));
+        i++;
+      }
+      content.push({
+        type: 'blockquote',
+        content: [{
+          type: 'paragraph',
+          content: parseInlineMarks(quoteLines.join(' '))
+        }]
+      });
+      continue;
+    }
+    
+    // Bullet list: - item or * item
+    if (trimmed.match(/^[-*]\s+/)) {
+      const listItems: JSONContent[] = [];
+      while (i < lines.length && lines[i].trim().match(/^[-*]\s+/)) {
+        const itemText = lines[i].trim().replace(/^[-*]\s+/, '');
+        listItems.push({
+          type: 'listItem',
+          content: [{
+            type: 'paragraph',
+            content: parseInlineMarks(itemText)
+          }]
+        });
+        i++;
+      }
+      content.push({
+        type: 'bulletList',
+        content: listItems
+      });
+      continue;
+    }
+    
+    // Ordered list: 1. item
+    if (trimmed.match(/^\d+\.\s+/)) {
+      const listItems: JSONContent[] = [];
+      while (i < lines.length && lines[i].trim().match(/^\d+\.\s+/)) {
+        const itemText = lines[i].trim().replace(/^\d+\.\s+/, '');
+        listItems.push({
+          type: 'listItem',
+          content: [{
+            type: 'paragraph',
+            content: parseInlineMarks(itemText)
+          }]
+        });
+        i++;
+      }
+      content.push({
+        type: 'orderedList',
+        content: listItems
+      });
+      continue;
+    }
+    
+    // Regular paragraph - collect consecutive non-special lines
+    const paragraphLines: string[] = [];
+    while (i < lines.length) {
+      const currentLine = lines[i].trim();
+      // Stop if we hit a special line or empty line
+      if (currentLine === '' || 
+          currentLine.match(/^#{1,6}\s/) ||
+          currentLine.match(/^[-*]\s+/) ||
+          currentLine.match(/^\d+\.\s+/) ||
+          currentLine.startsWith('> ')) {
+        break;
+      }
+      paragraphLines.push(currentLine);
+      i++;
+    }
+    
+    if (paragraphLines.length > 0) {
+      const paragraphText = paragraphLines.join(' ');
       content.push({
         type: 'paragraph',
-        content: [{ type: 'text', text: trimmed }]
+        content: parseInlineMarks(paragraphText)
       });
-    } else {
-      currentParagraph.push(trimmed);
     }
   }
-  
-  flushParagraph();
   
   return {
     type: 'doc',
