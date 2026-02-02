@@ -32,20 +32,18 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {!isLoading && (
-        <div className="relative min-h-screen bg-background noise">
-          <Navbar />
-          <main>
-            <Hero />
-            <Services />
-            <Portfolio />
-            <About />
-            <SectorProblems />
-            <Contact />
-          </main>
-          <Footer />
-        </div>
-      )}
+      <div className="relative min-h-screen bg-background noise">
+        <Navbar />
+        <main>
+          <Hero />
+          <Services />
+          <Portfolio />
+          <About />
+          <SectorProblems />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 };
