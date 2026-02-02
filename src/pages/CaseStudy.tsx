@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useCaseStudyBySlug } from '@/hooks/useCaseStudies';
+import { useCaseStudyBySlug, usePublishedCaseStudies } from '@/hooks/useCaseStudies';
 import { useCaseStudyImages } from '@/hooks/useCaseStudyImages';
 import { SEOHead } from '@/components/SEOHead';
 import { Navbar } from '@/components/Navbar';
@@ -8,9 +8,20 @@ import { ContentRenderer } from '@/components/case-study/ContentRenderer';
 import { CaseStudyGallery } from '@/components/case-study/CaseStudyGallery';
 import { RelatedCaseStudies } from '@/components/case-study/RelatedCaseStudies';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Helmet } from 'react-helmet-async';
+import { siteConfig, generateBreadcrumbSchema } from '@/lib/seo';
 import type { JSONContent } from '@tiptap/react';
+
+// Map service names to slugs for internal linking
+const SERVICE_SLUG_MAP: Record<string, string> = {
+  'Document Digitization': 'document-digitization',
+  'AI Automation': 'ai-automation',
+  'Custom Software': 'custom-software-development',
+  'Digital Transformation': 'digital-transformation',
+};
 
 export default function CaseStudy() {
   const { slug } = useParams();
@@ -35,9 +46,9 @@ export default function CaseStudy() {
             The case study you're looking for doesn't exist or has been removed.
           </p>
           <Button asChild>
-            <Link to="/#portfolio">
+            <Link to="/case-studies">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Portfolio
+              Back to Case Studies
             </Link>
           </Button>
         </main>
@@ -46,15 +57,83 @@ export default function CaseStudy() {
     );
   }
 
+  // Generate SEO description with results if available
+  const results = (caseStudy as any).results as Array<{label: string; value: string; context?: string}> || [];
+  const seoDescription = caseStudy.meta_description || 
+    (results.length > 0 
+      ? `${caseStudy.short_description} Results: ${results.slice(0, 2).map(r => `${r.value} ${r.label}`).join('. ')}.`
+      : caseStudy.short_description);
+
+  const seoTitle = caseStudy.meta_title || `Case Study: ${caseStudy.title} | Astute Computer`;
+
+  // Breadcrumb schema
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: siteConfig.url },
+    { name: 'Case Studies', url: `${siteConfig.url}/case-studies` },
+    { name: caseStudy.title, url: `${siteConfig.url}/case-studies/${caseStudy.slug}` },
+  ]);
+
+  // Article schema
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: caseStudy.title,
+    description: caseStudy.short_description,
+    image: caseStudy.thumbnail_url || undefined,
+    datePublished: caseStudy.published_at || caseStudy.created_at,
+    dateModified: caseStudy.updated_at,
+    author: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  };
+
+  // FAQ schema if FAQs exist
+  const faqs = (caseStudy as any).faqs as Array<{question: string; answer: string}> || [];
+  const faqSchema = faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
+  // Get related services for linking
+  const relatedServices = ((caseStudy as any).services || []) as string[];
+
   return (
     <>
       <SEOHead
-        title={caseStudy.meta_title || `${caseStudy.title} | Astute Computer`}
-        description={caseStudy.meta_description || caseStudy.short_description}
+        title={seoTitle}
+        description={seoDescription}
         canonical={`https://astutecomputer.com/case-studies/${caseStudy.slug}`}
         type="article"
         image={caseStudy.thumbnail_url || undefined}
       />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(articleSchema)}
+        </script>
+        {faqSchema && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
+        )}
+      </Helmet>
 
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -67,7 +146,7 @@ export default function CaseStudy() {
             size="sm"
             className="backdrop-blur-sm bg-background/80 border-border/50 shadow-lg"
           >
-            <Link to="/#portfolio">
+            <Link to="/case-studies">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Link>
@@ -95,9 +174,14 @@ export default function CaseStudy() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="inline-block text-xs uppercase tracking-widest text-muted-foreground mb-4">
-                  {caseStudy.category}
-                </span>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {(caseStudy as any).industry && (
+                    <Badge variant="secondary">{(caseStudy as any).industry}</Badge>
+                  )}
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                    {caseStudy.category}
+                  </span>
+                </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
                   {caseStudy.title}
@@ -107,7 +191,29 @@ export default function CaseStudy() {
                   {caseStudy.short_description}
                 </p>
 
-                {caseStudy.stat_value && caseStudy.stat_metric && (
+                {/* Key Results */}
+                {results.length > 0 && (
+                  <div className="flex flex-wrap gap-4 mb-8">
+                    {results.slice(0, 3).map((result, index) => (
+                      <div key={index} className="px-6 py-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border/50">
+                        <span className="text-3xl font-bold text-foreground block">
+                          {result.value}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {result.label}
+                        </span>
+                        {result.context && (
+                          <span className="text-xs text-muted-foreground/60 block">
+                            {result.context}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Fallback to old stat display */}
+                {results.length === 0 && caseStudy.stat_value && caseStudy.stat_metric && (
                   <div className="inline-flex items-baseline gap-2 px-6 py-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border/50">
                     <span className="text-4xl font-bold text-foreground">
                       {caseStudy.stat_value}
@@ -133,6 +239,29 @@ export default function CaseStudy() {
             </motion.div>
           </section>
 
+          {/* FAQs Section */}
+          {faqs.length > 0 && (
+            <section className="container-custom py-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="max-w-3xl mx-auto"
+              >
+                <h2 className="text-2xl font-bold mb-8">Frequently Asked Questions</h2>
+                <div className="space-y-6">
+                  {faqs.map((faq, index) => (
+                    <div key={index} className="border-b border-border/50 pb-6">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">{faq.question}</h3>
+                      <p className="text-muted-foreground">{faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </section>
+          )}
+
           {/* Gallery Section */}
           {images.length > 0 && (
             <section className="container-custom py-16">
@@ -144,6 +273,37 @@ export default function CaseStudy() {
               >
                 <h2 className="text-2xl font-bold mb-8">Project Gallery</h2>
                 <CaseStudyGallery images={images} />
+              </motion.div>
+            </section>
+          )}
+
+          {/* Related Services Section */}
+          {relatedServices.length > 0 && (
+            <section className="container-custom py-16 border-t border-border/50">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold mb-6">Related Services</h2>
+                <div className="flex flex-wrap gap-4">
+                  {relatedServices.map((service) => {
+                    const serviceSlug = SERVICE_SLUG_MAP[service];
+                    if (!serviceSlug) return null;
+                    return (
+                      <Link key={service} to={`/services/${serviceSlug}`}>
+                        <Badge
+                          variant="outline"
+                          className="text-base py-2 px-4 hover:bg-foreground/5 transition-colors"
+                        >
+                          {service}
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Badge>
+                      </Link>
+                    );
+                  })}
+                </div>
               </motion.div>
             </section>
           )}
