@@ -1,279 +1,288 @@
 
 
-# Add Markdown Import Feature for Case Studies
+# Update Markdown Import Template with Instructions
 
-This plan adds an "Import from Markdown" button that allows editors to quickly populate all case study fields from a structured `.md` file. Images and display order are excluded from import.
+Replace the example-based template with an instruction-focused template that clearly documents what should go in each field, lists available options for selection fields, and adds missing sections.
 
 ---
 
-## Implementation Overview
+## Changes to Template
 
-### 1. Create MarkdownImporter Component
+### 1. Header with Clear Instructions
 
-**File: `src/components/admin/MarkdownImporter.tsx`**
+Add comprehensive instructions at the top explaining:
+- How to fill in the frontmatter
+- What to write in content sections
+- What gets imported vs. what must be added manually
 
-A dialog-based component with:
-- File input accepting `.md` files
-- Example markdown template with download button
-- Import button that parses the file and returns structured data
-- Clear instructions and validation feedback
+### 2. Required Fields Section
 
-### 2. Markdown File Structure
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# REQUIRED FIELDS
+# ═══════════════════════════════════════════════════════════════
 
-The markdown file uses YAML frontmatter for metadata fields and markdown sections for content:
+# Title of the case study (displayed as H1 on the page)
+title: ""
+
+# URL-friendly slug (lowercase, hyphens only, must be unique)
+# Example format: "client-name-project-type" or "industry-solution-type"
+slug: ""
+
+# Category - SELECT ONE of these exact values:
+#   - "Digital Branding"
+#   - "Operations"
+#   - "AI Archives"
+#   - "Software Dev"
+category: ""
+
+# Brief summary (1-2 sentences, shown on cards and in search results)
+# Keep under 160 characters for optimal SEO
+short_description: ""
+```
+
+### 3. Metadata Section with Options Listed
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# METADATA
+# ═══════════════════════════════════════════════════════════════
+
+# Industry - SELECT ONE of these exact values:
+#   - "Audit"
+#   - "Retail"
+#   - "Manufacturing"
+#   - "Healthcare"
+#   - "Fintech"
+#   - "Legal"
+#   - "Education"
+#   - "Other"
+industry: ""
+
+# Non-identifying client descriptor (no PII)
+# Examples: "Fortune 500 Retailer", "Mid-size Audit Firm (India)", "Global Logistics Provider"
+client_type: ""
+
+# Services provided - SELECT from these options:
+#   - "Document Digitization"
+#   - "AI Automation"
+#   - "Custom Software Development"
+#   - "Digital Transformation"
+services:
+  - ""
+
+# Technologies used (free-form list)
+# Examples: Python, TensorFlow, React, Node.js, Supabase, AWS
+tech_stack:
+  - ""
+```
+
+### 4. Results Section with Clear Structure
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# KEY RESULTS (2-4 items recommended)
+# ═══════════════════════════════════════════════════════════════
+# Each result should have:
+#   - label: What was measured (e.g., "Processing time reduced")
+#   - value: The result (e.g., "8 hours to 45 minutes", "99.2%", "$2.4M")
+#   - context: (optional) Additional context (e.g., "per 1,000 invoices", "annually")
+
+results:
+  - label: ""
+    value: ""
+    context: ""
+```
+
+### 5. Card Stats Section
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# CARD STATISTICS
+# ═══════════════════════════════════════════════════════════════
+# These appear prominently on the case study card in listings
+
+# The headline number/metric (e.g., "94%", "10x", "$2.4M")
+stat_value: ""
+
+# What the stat measures (e.g., "Time Saved", "ROI Increase", "Cost Reduction")
+stat_metric: ""
+```
+
+### 6. NEW: SEO Section
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# SEO (Search Engine Optimization)
+# ═══════════════════════════════════════════════════════════════
+
+# Custom page title (leave empty to auto-generate from title)
+# Recommended format: "Case Study: [Title] | Astute Computer"
+# Keep under 60 characters
+meta_title: ""
+
+# Meta description for search results
+# Summarize the case study in 1-2 sentences
+# Keep between 120-160 characters for optimal display
+meta_description: ""
+```
+
+### 7. NEW: Related Content Section
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# RELATED CONTENT (for internal linking)
+# ═══════════════════════════════════════════════════════════════
+# Note: Related content improves SEO through internal linking.
+# Use slugs (URL paths) to reference other content.
+
+# Related service page slugs - SELECT from:
+#   - "document-digitization"
+#   - "ai-automation"
+#   - "custom-software-development"
+#   - "digital-transformation"
+related_services:
+  - ""
+
+# Related case study slugs (enter slugs of 2-3 other published case studies)
+# Example: "healthcare-records-digitization"
+related_case_studies:
+  - ""
+```
+
+### 8. FAQs Section with Guidelines
+
+```yaml
+# ═══════════════════════════════════════════════════════════════
+# FAQs (3-5 recommended for SEO)
+# ═══════════════════════════════════════════════════════════════
+# FAQs generate FAQ Schema markup which improves search visibility.
+# Write questions that potential clients might ask about this project.
+# Examples:
+#   - "How long did the implementation take?"
+#   - "What was the ROI timeline?"
+#   - "How was data security handled?"
+#   - "Can this solution scale?"
+
+faqs:
+  - question: ""
+    answer: ""
+```
+
+### 9. Content Sections with Writing Guidelines
 
 ```markdown
----
-# CASE STUDY IMPORT FILE
-# Instructions:
-# 1. Fill in the frontmatter (between --- lines) with metadata
-# 2. Write content under each ## section heading
-# 3. Images must be added manually after import
-# 4. Display order and publish status are set in the CMS
-
-# === REQUIRED FIELDS ===
-title: "AI-Powered Invoice Processing for Global Audit Firm"
-slug: "ai-invoice-processing-audit-firm"
-category: "AI Archives"  # Options: Digital Branding, Operations, AI Archives, Software Dev
-short_description: "Reduced invoice processing time from 8 hours to 45 minutes using custom AI document extraction."
-
-# === METADATA ===
-industry: "Audit"  # Options: Audit, Retail, Manufacturing, Healthcare, Fintech, Legal, Education, Other
-client_type: "Big 4 Audit Firm (Global)"
-services:
-  - "AI Automation"
-  - "Document Digitization"
-tech_stack:
-  - "Python"
-  - "TensorFlow"
-  - "React"
-  - "Supabase"
-
-# === KEY RESULTS (2-4 items) ===
-results:
-  - label: "Processing time reduced"
-    value: "8 hours → 45 minutes"
-    context: "per 1,000 invoices"
-  - label: "Accuracy improved"
-    value: "99.2%"
-    context: "vs 94% manual"
-  - label: "Cost savings"
-    value: "$2.4M annually"
-
-# === STATS (shown on card) ===
-stat_value: "94%"
-stat_metric: "Time Saved"
-
-# === SEO (optional - auto-generated if empty) ===
-meta_title: ""
-meta_description: ""
-
-# === FAQs (optional, 3-5 recommended for SEO) ===
-faqs:
-  - question: "How long did the implementation take?"
-    answer: "The full implementation took 12 weeks, including integration testing and staff training."
-  - question: "What was the ROI timeline?"
-    answer: "The client achieved positive ROI within 4 months of deployment."
----
-
 ## Client & Context
 
+[INSTRUCTIONS]
 Provide background about the client without revealing confidential information.
-Focus on their industry, size, and relevant context for the case study.
+Focus on:
+- Industry and sector
+- Company size/scope (without naming)
+- Relevant context that led to this project
 
-Example: A leading Big 4 audit firm with operations in 45 countries was struggling with manual invoice processing across their global offices.
+DO NOT include:
+- Client name or identifiable details
+- Specific locations (unless authorized)
+- Confidential business information
+
 
 ## Problem
 
+[INSTRUCTIONS]
 Describe the challenge or pain point the client faced.
-Be specific about the business impact and urgency.
+Include:
+- The specific business problem
+- Impact on operations/revenue/efficiency
+- Why existing solutions weren't working
+- Urgency or timeline pressures
 
-Example: Manual invoice processing required 8+ hours per batch of 1,000 invoices, leading to delays in client reporting and increased operational costs.
 
 ## Goals / Success Criteria
 
+[INSTRUCTIONS]
 Define what success looked like for this project.
-Include measurable targets where possible.
+List:
+- Measurable targets (percentages, time savings, cost reduction)
+- Qualitative goals (user experience, reliability)
+- Must-have vs. nice-to-have requirements
 
-Example:
-- Reduce processing time by at least 80%
-- Maintain or improve accuracy (target: 98%+)
-- Enable real-time dashboard for processing status
 
 ## Solution
 
+[INSTRUCTIONS]
 Explain how you solved the problem.
-Focus on the approach and key decisions, not just the technology.
+Focus on:
+- Overall approach and strategy
+- Key technical decisions
+- Why this approach was chosen
+- Unique aspects of your solution
 
-Example: We developed a custom AI pipeline combining OCR, NLP, and machine learning to automatically extract, validate, and categorize invoice data.
 
 ## Implementation
 
+[INSTRUCTIONS]
 Describe the technical approach and process.
-Include timeline, phases, and any challenges overcome.
+Include:
+- Project phases and timeline
+- Key milestones
+- Challenges overcome
+- Team collaboration approach
 
-Example: 
-Phase 1 (Weeks 1-4): Data collection and model training
-Phase 2 (Weeks 5-8): API development and integration
-Phase 3 (Weeks 9-12): Testing, optimization, and deployment
 
 ## Results Narrative
 
-Provide a detailed narrative of the outcomes and impact.
-This complements the quantitative results in the frontmatter.
+[INSTRUCTIONS]
+Provide a detailed narrative of outcomes and impact.
+This complements the quantitative "results" in the frontmatter.
+Include:
+- Qualitative improvements
+- Client feedback/testimonials (if available)
+- Unexpected benefits
+- Long-term impact
 
-Example: Within the first month of deployment, the client processed over 50,000 invoices with 99.2% accuracy. The operations team reported significant reduction in overtime hours.
 
 ## Next Steps / CTA
 
+[INSTRUCTIONS]
 Describe future plans or include a call to action.
-
-Example: The client is now exploring expansion of the AI system to handle expense reports and purchase orders. Contact us to learn how we can transform your document processing.
+Options:
+- Planned expansions of the solution
+- How similar results can be achieved for readers
+- Contact information or next step
 ```
 
 ---
 
-### 3. Parsing Logic
+## Parser Updates
 
-The import function will:
+### Add Related Content Fields to Interface
 
-1. **Extract frontmatter** using regex to find content between `---` markers
-2. **Parse YAML** frontmatter into structured fields
-3. **Extract sections** by splitting on `## ` headings
-4. **Convert markdown to TipTap JSON** for rich text sections
-5. **Validate required fields** (title, slug, category, short_description)
-6. **Return structured data** matching the form state types
-
-### 4. Section Mapping
-
-Markdown headings map to `sectionContent` keys:
-
-| Markdown Heading | sectionContent Key |
-|-----------------|-------------------|
-| `## Client & Context` | `context` |
-| `## Problem` | `problem` |
-| `## Goals / Success Criteria` | `goals` |
-| `## Solution` | `solution` |
-| `## Implementation` | `implementation` |
-| `## Results Narrative` | `results_narrative` |
-| `## Next Steps / CTA` | `next_steps` |
-
-### 5. UI Integration
-
-Add import button to the CaseStudyEdit header (near Save/Publish buttons):
-
-```tsx
-<Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-  <Upload className="h-4 w-4 mr-2" />
-  Import MD
-</Button>
+```typescript
+export interface ParsedCaseStudy {
+  // ... existing fields ...
+  
+  // NEW: Related content for internal linking
+  related_services?: string[];
+  related_case_studies?: string[];
+}
 ```
 
-The dialog contains:
-- Instructions text
-- "Download Example Template" button
-- File drop zone / file input
-- Preview of parsed data (optional)
-- "Import" and "Cancel" buttons
+### Update Parser to Extract New Fields
 
-### 6. Import Handler
-
-When a file is imported:
-
-1. Parse the markdown file
-2. Show confirmation if form already has data ("This will overwrite existing data")
-3. Populate all form state variables except:
-   - `thumbnailUrl` / `thumbnailAlt` (images added manually)
-   - `displayOrder` (set in CMS)
-   - `isPublished` (always false on import)
-   - `relatedCaseStudyIds` / `relatedServiceIds` (require ID lookups)
+Parse `related_services` and `related_case_studies` from frontmatter and include them in the returned data.
 
 ---
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/components/admin/MarkdownImporter.tsx` | Dialog component with file parsing |
-| `src/lib/markdown-parser.ts` | Parsing utilities for frontmatter and sections |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/admin/CaseStudyEdit.tsx` | Add import button and dialog integration |
+| `src/lib/markdown-parser.ts` | Replace `EXAMPLE_TEMPLATE` with instruction-focused template, add related content fields to interface and parser |
 
 ---
 
-## Technical Details
+## Template Download Filename
 
-### Frontmatter Parsing
-
-Use a simple regex-based YAML parser (no external dependency needed):
-
-```typescript
-function parseFrontmatter(content: string) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return null;
-  
-  const yaml = match[1];
-  // Parse YAML key-value pairs, arrays, and nested objects
-  return parseYaml(yaml);
-}
-```
-
-### Markdown to TipTap JSON
-
-Convert markdown paragraphs to TipTap's `JSONContent` format:
-
-```typescript
-function markdownToTipTap(markdown: string): JSONContent {
-  const paragraphs = markdown.split('\n\n').filter(p => p.trim());
-  return {
-    type: 'doc',
-    content: paragraphs.map(p => ({
-      type: 'paragraph',
-      content: [{ type: 'text', text: p.trim() }]
-    }))
-  };
-}
-```
-
-### Validation
-
-Display errors for:
-- Missing required fields (title, slug, category, short_description)
-- Invalid category value
-- Invalid industry value
-- Malformed YAML
-
----
-
-## User Flow
-
-1. User clicks "Import MD" button
-2. Dialog opens with instructions and example template
-3. User downloads template, fills it out
-4. User drags/selects the `.md` file
-5. System validates and shows preview
-6. User clicks "Import" to populate form
-7. User manually adds thumbnail image
-8. User reviews and saves/publishes
-
----
-
-## Example Template Download
-
-The component includes a button to download the example template:
-
-```typescript
-const downloadTemplate = () => {
-  const blob = new Blob([EXAMPLE_TEMPLATE], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'case-study-template.md';
-  a.click();
-};
-```
+Change downloaded filename from `case-study-template.md` to `case-study-import-template.md` for clarity.
 
