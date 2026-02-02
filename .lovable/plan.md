@@ -1,276 +1,112 @@
 
+# Fix Case Study Page: Render Section Content & Expandable FAQs
 
-# Update Markdown Import Template with Instructions
-
-Replace the example-based template with an instruction-focused template that clearly documents what should go in each field, lists available options for selection fields, and adds missing sections.
+The case study page currently only displays the old `content` field and FAQs as static text. This plan updates the page to render the structured `section_content` with semantic H2 headings and converts FAQs to an expandable accordion.
 
 ---
 
-## Changes to Template
+## Problem Analysis
 
-### 1. Header with Clear Instructions
+**Current Behavior:**
+- Only the old `content` field is rendered via `ContentRenderer` (line 238)
+- `section_content` (which contains Problem, Solution, etc.) is stored in the database but never displayed
+- FAQs are rendered as static divs, not expandable accordions
 
-Add comprehensive instructions at the top explaining:
-- How to fill in the frontmatter
-- What to write in content sections
-- What gets imported vs. what must be added manually
+**Expected Behavior:**
+- Display each populated section from `section_content` with proper H2 headings
+- Render FAQs at the bottom as an expandable accordion
 
-### 2. Required Fields Section
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# REQUIRED FIELDS
-# ═══════════════════════════════════════════════════════════════
-
-# Title of the case study (displayed as H1 on the page)
-title: ""
-
-# URL-friendly slug (lowercase, hyphens only, must be unique)
-# Example format: "client-name-project-type" or "industry-solution-type"
-slug: ""
-
-# Category - SELECT ONE of these exact values:
-#   - "Digital Branding"
-#   - "Operations"
-#   - "AI Archives"
-#   - "Software Dev"
-category: ""
-
-# Brief summary (1-2 sentences, shown on cards and in search results)
-# Keep under 160 characters for optimal SEO
-short_description: ""
-```
-
-### 3. Metadata Section with Options Listed
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# METADATA
-# ═══════════════════════════════════════════════════════════════
-
-# Industry - SELECT ONE of these exact values:
-#   - "Audit"
-#   - "Retail"
-#   - "Manufacturing"
-#   - "Healthcare"
-#   - "Fintech"
-#   - "Legal"
-#   - "Education"
-#   - "Other"
-industry: ""
-
-# Non-identifying client descriptor (no PII)
-# Examples: "Fortune 500 Retailer", "Mid-size Audit Firm (India)", "Global Logistics Provider"
-client_type: ""
-
-# Services provided - SELECT from these options:
-#   - "Document Digitization"
-#   - "AI Automation"
-#   - "Custom Software Development"
-#   - "Digital Transformation"
-services:
-  - ""
-
-# Technologies used (free-form list)
-# Examples: Python, TensorFlow, React, Node.js, Supabase, AWS
-tech_stack:
-  - ""
-```
-
-### 4. Results Section with Clear Structure
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# KEY RESULTS (2-4 items recommended)
-# ═══════════════════════════════════════════════════════════════
-# Each result should have:
-#   - label: What was measured (e.g., "Processing time reduced")
-#   - value: The result (e.g., "8 hours to 45 minutes", "99.2%", "$2.4M")
-#   - context: (optional) Additional context (e.g., "per 1,000 invoices", "annually")
-
-results:
-  - label: ""
-    value: ""
-    context: ""
-```
-
-### 5. Card Stats Section
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# CARD STATISTICS
-# ═══════════════════════════════════════════════════════════════
-# These appear prominently on the case study card in listings
-
-# The headline number/metric (e.g., "94%", "10x", "$2.4M")
-stat_value: ""
-
-# What the stat measures (e.g., "Time Saved", "ROI Increase", "Cost Reduction")
-stat_metric: ""
-```
-
-### 6. NEW: SEO Section
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# SEO (Search Engine Optimization)
-# ═══════════════════════════════════════════════════════════════
-
-# Custom page title (leave empty to auto-generate from title)
-# Recommended format: "Case Study: [Title] | Astute Computer"
-# Keep under 60 characters
-meta_title: ""
-
-# Meta description for search results
-# Summarize the case study in 1-2 sentences
-# Keep between 120-160 characters for optimal display
-meta_description: ""
-```
-
-### 7. NEW: Related Content Section
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# RELATED CONTENT (for internal linking)
-# ═══════════════════════════════════════════════════════════════
-# Note: Related content improves SEO through internal linking.
-# Use slugs (URL paths) to reference other content.
-
-# Related service page slugs - SELECT from:
-#   - "document-digitization"
-#   - "ai-automation"
-#   - "custom-software-development"
-#   - "digital-transformation"
-related_services:
-  - ""
-
-# Related case study slugs (enter slugs of 2-3 other published case studies)
-# Example: "healthcare-records-digitization"
-related_case_studies:
-  - ""
-```
-
-### 8. FAQs Section with Guidelines
-
-```yaml
-# ═══════════════════════════════════════════════════════════════
-# FAQs (3-5 recommended for SEO)
-# ═══════════════════════════════════════════════════════════════
-# FAQs generate FAQ Schema markup which improves search visibility.
-# Write questions that potential clients might ask about this project.
-# Examples:
-#   - "How long did the implementation take?"
-#   - "What was the ROI timeline?"
-#   - "How was data security handled?"
-#   - "Can this solution scale?"
-
-faqs:
-  - question: ""
-    answer: ""
-```
-
-### 9. Content Sections with Writing Guidelines
-
-```markdown
-## Client & Context
-
-[INSTRUCTIONS]
-Provide background about the client without revealing confidential information.
-Focus on:
-- Industry and sector
-- Company size/scope (without naming)
-- Relevant context that led to this project
-
-DO NOT include:
-- Client name or identifiable details
-- Specific locations (unless authorized)
-- Confidential business information
-
-
-## Problem
-
-[INSTRUCTIONS]
-Describe the challenge or pain point the client faced.
-Include:
-- The specific business problem
-- Impact on operations/revenue/efficiency
-- Why existing solutions weren't working
-- Urgency or timeline pressures
-
-
-## Goals / Success Criteria
-
-[INSTRUCTIONS]
-Define what success looked like for this project.
-List:
-- Measurable targets (percentages, time savings, cost reduction)
-- Qualitative goals (user experience, reliability)
-- Must-have vs. nice-to-have requirements
-
-
-## Solution
-
-[INSTRUCTIONS]
-Explain how you solved the problem.
-Focus on:
-- Overall approach and strategy
-- Key technical decisions
-- Why this approach was chosen
-- Unique aspects of your solution
-
+---
 
 ## Implementation
 
-[INSTRUCTIONS]
-Describe the technical approach and process.
-Include:
-- Project phases and timeline
-- Key milestones
-- Challenges overcome
-- Team collaboration approach
+### 1. Update CaseStudy.tsx to Render Section Content
 
+Add section content rendering between the hero and FAQs:
 
-## Results Narrative
+```tsx
+// Section configuration matching the editor
+const SECTION_CONFIG = [
+  { key: 'context', label: 'Client & Context' },
+  { key: 'problem', label: 'The Problem' },
+  { key: 'goals', label: 'Success Criteria' },
+  { key: 'solution', label: 'Our Solution' },
+  { key: 'implementation', label: 'Implementation' },
+  { key: 'results_narrative', label: 'Results' },
+  { key: 'next_steps', label: 'Next Steps' },
+];
 
-[INSTRUCTIONS]
-Provide a detailed narrative of outcomes and impact.
-This complements the quantitative "results" in the frontmatter.
-Include:
-- Qualitative improvements
-- Client feedback/testimonials (if available)
-- Unexpected benefits
-- Long-term impact
-
-
-## Next Steps / CTA
-
-[INSTRUCTIONS]
-Describe future plans or include a call to action.
-Options:
-- Planned expansions of the solution
-- How similar results can be achieved for readers
-- Contact information or next step
+// Render each populated section
+{sectionContent && (
+  <section className="container-custom py-16">
+    <div className="max-w-3xl mx-auto prose prose-lg prose-invert">
+      {SECTION_CONFIG.map(({ key, label }) => {
+        const content = sectionContent[key];
+        if (!content || !content.content?.length) return null;
+        return (
+          <motion.div key={key}>
+            <h2>{label}</h2>
+            <ContentRenderer content={content} />
+          </motion.div>
+        );
+      })}
+    </div>
+  </section>
+)}
 ```
 
----
+### 2. Convert FAQs to Accordion
 
-## Parser Updates
+Import the Accordion components and update the FAQs section:
 
-### Add Related Content Fields to Interface
+```tsx
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
-```typescript
-export interface ParsedCaseStudy {
-  // ... existing fields ...
-  
-  // NEW: Related content for internal linking
-  related_services?: string[];
-  related_case_studies?: string[];
-}
+// Updated FAQs section
+{faqs.length > 0 && (
+  <section className="container-custom py-16">
+    <div className="max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-8">Frequently Asked Questions</h2>
+      <Accordion type="single" collapsible className="w-full">
+        {faqs.map((faq, index) => (
+          <AccordionItem key={index} value={`faq-${index}`}>
+            <AccordionTrigger className="text-left text-lg">
+              {faq.question}
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground">
+              {faq.answer}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  </section>
+)}
 ```
 
-### Update Parser to Extract New Fields
+### 3. Extract Section Content from Case Study Data
 
-Parse `related_services` and `related_case_studies` from frontmatter and include them in the returned data.
+Add parsing of the `section_content` field from the case study:
+
+```tsx
+// Parse section_content from the case study
+const sectionContent = (caseStudy as any).section_content as Record<string, JSONContent> | null;
+```
+
+### 4. Update Section Ordering
+
+Ensure sections are rendered in the correct order:
+1. Hero (title, description, results stats)
+2. Section Content (Client & Context, Problem, Goals, Solution, Implementation, Results Narrative, Next Steps)
+3. Gallery (if images exist)
+4. FAQs (expandable accordion)
+5. Related Services
+6. Related Case Studies
 
 ---
 
@@ -278,11 +114,48 @@ Parse `related_services` and `related_case_studies` from frontmatter and include
 
 | File | Changes |
 |------|---------|
-| `src/lib/markdown-parser.ts` | Replace `EXAMPLE_TEMPLATE` with instruction-focused template, add related content fields to interface and parser |
+| `src/pages/CaseStudy.tsx` | Add section content rendering, convert FAQs to accordion |
 
 ---
 
-## Template Download Filename
+## Visual Structure After Fix
 
-Change downloaded filename from `case-study-template.md` to `case-study-import-template.md` for clarity.
+```
+[Hero Section]
+  - Title, description, key results cards
 
+[Content Sections]
+  - H2: Client & Context
+    - (content)
+  - H2: The Problem
+    - (content)
+  - H2: Success Criteria
+    - (content)
+  - H2: Our Solution
+    - (content)
+  - H2: Implementation
+    - (content)
+  - H2: Results
+    - (content)
+  - H2: Next Steps
+    - (content)
+
+[Gallery] (if images)
+
+[FAQs - Expandable Accordion]
+  > How long did implementation take?
+  > What was the ROI?
+  > (etc.)
+
+[Related Services]
+[Related Case Studies]
+```
+
+---
+
+## Technical Notes
+
+- Section content is stored as TipTap JSONContent per section
+- Only sections with actual content (content array length > 0) are rendered
+- FAQs use `type="single" collapsible` so only one expands at a time
+- The old `content` field rendering can be removed or kept as fallback for legacy case studies
