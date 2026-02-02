@@ -1,97 +1,95 @@
 
-# Fix Markdown-to-TipTap Conversion
+# Fix Sitemap for SEO Best Practices
 
-The `markdownToTipTap` function in `src/lib/markdown-parser.ts` is too simplistic. It's treating all markdown content as plain text paragraphs instead of converting markdown syntax into proper TipTap JSON structures with marks (bold, italic) and nodes (headings, lists).
+## Current Issues
 
----
-
-## Problem
-
-The current function:
-- Ignores `**bold**` syntax - outputs raw `**text**`
-- Ignores `### Heading` syntax - outputs raw `### text`
-- Ignores `- list item` syntax - outputs as plain text with `-`
-- Ignores `*italic*` and other inline formatting
-
----
+1. **Anchor URLs in static sitemap** - URLs like `/#services`, `/#portfolio`, `/#contact` are not separate pages and shouldn't be in sitemap
+2. **Outdated lastmod dates** - Shows `2025-02-01` instead of current date
+3. **Duplicate sitemap sources** - Both a static file and dynamic edge function exist
 
 ## Solution
 
-Rewrite `markdownToTipTap` to properly convert:
-
-| Markdown Syntax | TipTap JSON Structure |
-|----------------|----------------------|
-| `**text**` | `{ type: 'text', text: 'text', marks: [{ type: 'bold' }] }` |
-| `*text*` | `{ type: 'text', text: 'text', marks: [{ type: 'italic' }] }` |
-| `### Heading` | `{ type: 'heading', attrs: { level: 3 }, content: [...] }` |
-| `- item` | `{ type: 'bulletList', content: [{ type: 'listItem', content: [...] }] }` |
-| `1. item` | `{ type: 'orderedList', content: [{ type: 'listItem', content: [...] }] }` |
+Replace the static `public/sitemap.xml` with SEO-optimized content that only includes real, unique URLs. The dynamic edge function already has the correct structure.
 
 ---
 
-## Implementation Details
+## Implementation
 
-### 1. Parse Inline Marks
+### Update `public/sitemap.xml`
 
-Create a function to parse inline markdown and convert to TipTap text nodes with marks:
+Remove all anchor-based URLs and only include real pages:
 
-```typescript
-function parseInlineMarks(text: string): JSONContent[] {
-  const nodes: JSONContent[] = [];
-  // Regex to match **bold**, *italic*, `code`, [link](url)
-  // Split and process each segment, applying appropriate marks
-}
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://astutecomputer.com/</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://astutecomputer.com/case-studies</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://astutecomputer.com/about</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://astutecomputer.com/contact</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
 ```
-
-### 2. Handle Block-Level Elements
-
-Update the main loop to detect and handle:
-
-```typescript
-// Headings: ### text
-if (trimmed.match(/^#{1,6}\s/)) {
-  const level = trimmed.match(/^(#+)/)[1].length;
-  const text = trimmed.replace(/^#+\s*/, '');
-  content.push({
-    type: 'heading',
-    attrs: { level },
-    content: parseInlineMarks(text)
-  });
-}
-
-// Bullet lists: - item
-if (trimmed.startsWith('- ')) {
-  // Collect consecutive list items into a bulletList node
-}
-
-// Ordered lists: 1. item
-if (trimmed.match(/^\d+\.\s/)) {
-  // Collect consecutive items into an orderedList node
-}
-```
-
-### 3. Handle Nested Marks
-
-Support combined formatting like `**bold *and italic* text**`:
-- Parse outer marks first
-- Recursively process inner content
 
 ---
 
-## Supported Markdown Syntax After Fix
+## URLs Included (Real Pages Only)
 
-| Syntax | Renders As |
-|--------|-----------|
-| `**bold**` | **bold** |
-| `*italic*` | *italic* |
-| `***bold italic***` | ***bold italic*** |
-| `~~strikethrough~~` | ~~strikethrough~~ |
-| `` `code` `` | `code` |
-| `[link](url)` | clickable link |
-| `### Heading` | H3 heading |
-| `- item` | Bullet list |
-| `1. item` | Numbered list |
-| `> quote` | Blockquote |
+| URL | Priority | Rationale |
+|-----|----------|-----------|
+| `/` | 1.0 | Homepage - highest priority |
+| `/case-studies` | 0.9 | Hub page for all case studies |
+| `/about` | 0.7 | Standalone about page |
+| `/contact` | 0.8 | Contact page for conversions |
+
+---
+
+## URLs Removed (Anchor Links)
+
+| Removed URL | Reason |
+|-------------|--------|
+| `/#services` | Anchor on homepage, not a unique page |
+| `/#portfolio` | Anchor on homepage, not a unique page |
+| `/#about` | Anchor on homepage (real `/about` page exists) |
+| `/#sectors` | Anchor on homepage, not a unique page |
+| `/#contact` | Anchor on homepage (real `/contact` page exists) |
+
+---
+
+## Dynamic Sitemap (Already Correct)
+
+The edge function at `supabase/functions/sitemap/index.ts` is already properly configured to:
+- Include only real page URLs
+- Dynamically add `/services/{slug}` for published services
+- Dynamically add `/case-studies/{slug}` for published case studies
+- Use current date for `lastmod`
+
+---
+
+## Future Recommendation
+
+Consider setting up your server/CDN to serve the dynamic sitemap from the edge function at `/sitemap.xml` instead of the static file. This ensures:
+- New case studies and services are automatically included
+- `lastmod` dates are always current
+- No manual updates required
 
 ---
 
@@ -99,14 +97,4 @@ Support combined formatting like `**bold *and italic* text**`:
 
 | File | Changes |
 |------|---------|
-| `src/lib/markdown-parser.ts` | Rewrite `markdownToTipTap` function to properly parse markdown syntax |
-
----
-
-## Edge Cases Handled
-
-1. **Nested formatting**: `**bold *italic* bold**`
-2. **Escaped characters**: `\*not italic\*`
-3. **Empty lines**: Properly separate paragraphs
-4. **Mixed content**: Lists followed by paragraphs
-5. **Incomplete marks**: `**bold without closing` treated as plain text
+| `public/sitemap.xml` | Remove anchor URLs, update to real pages only, fix lastmod date |
