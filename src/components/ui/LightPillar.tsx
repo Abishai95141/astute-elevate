@@ -93,13 +93,13 @@ const LightPillar = ({
 
     const qualitySettings = {
       low: { iterations: 28, waveIterations: 2, pixelRatio: 0.6, precision: 'mediump', stepMultiplier: 1.5 },
-      medium: { iterations: 32, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.4 },
+      medium: { iterations: 40, waveIterations: 2, pixelRatio: Math.min(window.devicePixelRatio, 1.5), precision: 'highp', stepMultiplier: 1.3 },
       high: {
-        iterations: 60, // Reduced from 80 for better performance
-        waveIterations: 3, // Reduced from 4
-        pixelRatio: Math.min(window.devicePixelRatio, 1.5), // Cap at 1.5 instead of 2
+        iterations: 60,
+        waveIterations: 3,
+        pixelRatio: Math.min(window.devicePixelRatio, 2.0),
         precision: 'highp',
-        stepMultiplier: 1.2 // Increased from 1.0 for faster stepping
+        stepMultiplier: 1.2
       }
     };
 
@@ -215,7 +215,7 @@ const LightPillar = ({
         float widthNorm = uPillarWidth / 3.0;
         col = tanh(col * uGlowAmount / widthNorm);
         
-        col -= fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) / 15.0 * uNoiseIntensity;
+        col -= fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) / 255.0 * uNoiseIntensity;
         
         gl_FragColor = vec4(col * uIntensity, 1.0);
       }

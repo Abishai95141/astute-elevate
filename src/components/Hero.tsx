@@ -30,7 +30,7 @@ export function Hero() {
             glowAmount={0.002}
             pillarWidth={3}
             pillarHeight={0.4}
-            noiseIntensity={0.5}
+            noiseIntensity={0.08}
             pillarRotation={25}
             interactive={false}
             mixBlendMode="screen"
