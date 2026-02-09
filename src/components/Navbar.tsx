@@ -294,11 +294,11 @@ export function Navbar() {
                 {/* Contact Info */}
                 <div className="mb-6">
                   <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Get in touch</p>
-                  <a href="mailto:hello@astutecomputer.com" className="block text-white/80 hover:text-primary transition-colors mb-2">
-                    hello@astutecomputer.com
+                  <a href="mailto:astutecomputer.contact@gmail.com" className="block text-white/80 hover:text-primary transition-colors mb-2">
+                    astutecomputer.contact@gmail.com
                   </a>
-                  <a href="tel:+919876543210" className="block text-white/80 hover:text-primary transition-colors">
-                    +91 98765 43210
+                  <a href="tel:+918667331224" className="block text-white/80 hover:text-primary transition-colors">
+                    +91 8667331224
                   </a>
                 </div>
 

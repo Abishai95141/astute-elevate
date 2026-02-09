@@ -54,10 +54,6 @@ export function StatsBento() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-              <div className="inline-flex items-center gap-2 mb-2 flex-wrap">
-                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold bg-primary/20 text-primary rounded">New</span>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Dewdrop AI is your AI Consultant</span>
-              </div>
               <h3 className="text-3xl sm:text-4xl font-bold text-foreground">AI</h3>
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
                 With AI-powered automation, operational friction reduces significantly, costs drop by nearly 40%, and time-to-market accelerates dramatically.

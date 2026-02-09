@@ -92,7 +92,7 @@ const LightPillar = ({
     if (isMobile) effectiveQuality = 'low';
 
     const qualitySettings = {
-      low: { iterations: 16, waveIterations: 1, pixelRatio: 0.35, precision: 'mediump', stepMultiplier: 1.8 },
+      low: { iterations: 28, waveIterations: 2, pixelRatio: 0.6, precision: 'mediump', stepMultiplier: 1.5 },
       medium: { iterations: 32, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.4 },
       high: {
         iterations: 60, // Reduced from 80 for better performance
