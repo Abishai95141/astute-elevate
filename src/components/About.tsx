@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { useInView } from 'framer-motion';
-import { Target, Lightbulb, Users, Zap, Shield, Clock } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { Target, Lightbulb, Users, Zap, Shield, Clock, ArrowRight } from 'lucide-react';
 import { BlurFade } from '@/components/ui/BlurFade';
 import { Counter } from '@/components/ui/Counter';
 
@@ -9,38 +9,44 @@ const features = [
     icon: Target,
     title: 'Precision',
     description: 'Every line of code, every pixel, every decision is made with purpose and accuracy.',
+    accent: 'from-blue-500 to-cyan-400',
   },
   {
     icon: Lightbulb,
     title: 'Innovation',
     description: 'We push boundaries and embrace cutting-edge technologies to deliver modern solutions.',
+    accent: 'from-amber-400 to-orange-500',
   },
   {
     icon: Users,
     title: 'Partnership',
     description: 'Your success is our success. We grow together as true partners in your journey.',
+    accent: 'from-emerald-400 to-teal-500',
   },
   {
     icon: Zap,
     title: 'Impact',
     description: 'We deliver solutions that make a measurable difference to your bottom line.',
+    accent: 'from-violet-400 to-purple-500',
   },
   {
     icon: Shield,
     title: 'Security',
     description: 'Enterprise-grade security measures to protect your data and operations.',
+    accent: 'from-rose-400 to-pink-500',
   },
   {
     icon: Clock,
     title: 'Reliability',
     description: '99.9% uptime guarantee with 24/7 monitoring and rapid response times.',
+    accent: 'from-sky-400 to-blue-500',
   },
 ];
 
 const stats = [
-  { value: 30, suffix: '+', label: 'Projects Delivered' },
-  { value: 3, suffix: '+', label: 'Years Experience' },
-  { value: 100, suffix: '%', label: 'Client Satisfaction' },
+  { value: 4, suffix: '+', label: 'Industries Served' },
+  { value: 3, suffix: '+', label: 'Years in Business' },
+  { value: 10, suffix: '+', label: 'Solutions Deployed' },
   { value: 24, suffix: '/7', label: 'Support Available' },
 ];
 
@@ -52,10 +58,11 @@ export function About() {
     <section id="about" className="relative overflow-hidden py-20 sm:py-24 md:py-32">
       <div className="absolute inset-0 grid-pattern opacity-10" />
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[150px]" />
+      <div className="absolute top-20 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[120px]" />
 
       <div ref={ref} className="container-custom relative z-10 px-6 sm:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12 sm:mb-16">
+        <div className="text-center mb-14 sm:mb-20">
           <BlurFade>
             <span className="inline-block text-xs sm:text-sm uppercase tracking-widest text-primary mb-3 sm:mb-4">
               Why Partner With Us
@@ -75,40 +82,86 @@ export function About() {
           </BlurFade>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20">
-          {features.map((feature, index) => (
-            <BlurFade key={feature.title} delay={0.1 * index}>
-              <div className="group p-5 sm:p-6 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card transition-all duration-300">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+        {/* Stats Row — inline above the bento grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-10 sm:mb-14">
+          {stats.map((stat, index) => (
+            <BlurFade key={stat.label} delay={0.08 * index}>
+              <motion.div
+                whileHover={{ y: -4 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="relative overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-sm p-5 sm:p-6 text-center group hover:border-primary/30 transition-colors duration-300"
+              >
+                {/* Subtle gradient glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-1">
+                    <Counter value={stat.value} suffix={stat.suffix} />
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
+              </motion.div>
             </BlurFade>
           ))}
         </div>
 
-        {/* Stats Section */}
-        <BlurFade delay={0.4}>
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 p-6 sm:p-8 md:p-12">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-primary/20 rounded-full blur-[80px]" />
-            
-            <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
-              {stats.map((stat, index) => (
-                <div key={stat.label}>
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-2">
-                    <Counter value={stat.value} suffix={stat.suffix} />
+        {/* Bento Features Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {features.map((feature, index) => {
+            // First and last cards span 2 cols on large screens for visual variety
+            const isWide = index === 0 || index === 5;
+            return (
+              <BlurFade
+                key={feature.title}
+                delay={0.06 * index}
+                className={isWide ? 'sm:col-span-2 lg:col-span-2' : ''}
+              >
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className="group relative h-full overflow-hidden rounded-2xl border border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card transition-all duration-300"
+                >
+                  {/* Accent gradient bar at top */}
+                  <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${feature.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+
+                  <div className={`relative z-10 p-6 sm:p-7 flex ${isWide ? 'flex-col sm:flex-row sm:items-center sm:gap-6' : 'flex-col'}`}>
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.accent} flex items-center justify-center shadow-lg mb-4 ${isWide ? 'sm:mb-0 sm:flex-shrink-0' : ''}`}>
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+
+                    {/* Arrow that slides in on hover */}
+                    <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                      <ArrowRight className="w-4 h-4 text-primary" />
+                    </div>
                   </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+                </motion.div>
+              </BlurFade>
+            );
+          })}
+        </div>
+
+        {/* Bottom CTA strip */}
+        <BlurFade delay={0.5}>
+          <div className="mt-14 sm:mt-20 text-center">
+            <p className="text-muted-foreground text-sm sm:text-base mb-5">
+              Ready to modernize your operations?
+            </p>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-blue-500 text-white font-medium text-sm sm:text-base hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              Let's Talk
+              <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
         </BlurFade>
       </div>

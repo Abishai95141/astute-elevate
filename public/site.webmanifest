@@ -1,6 +1,10 @@
 {
-  "name": "Astute Computer",
-  "short_name": "Astute",
+  "name": "Astute Computer - Digital Transformation & Software Solutions",
+  "short_name": "Astute Computer",
+  "description": "Chennai-based software consultancy specialising in digital transformation, AI document digitization, operations automation, and custom software development.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "icons": [
     {
       "src": "/favicon-192x192.png",
@@ -17,5 +21,9 @@
   ],
   "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"]
 }

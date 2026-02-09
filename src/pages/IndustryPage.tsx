@@ -135,6 +135,21 @@ export default function IndustryPage() {
         title={industry.metaTitle}
         description={industry.metaDescription}
         canonical={`${siteConfig.url}/industries/${industry.slug}`}
+        keywords={`${industry.title} digital transformation, ${industry.title} software Chennai, ${industry.title} document digitization, ${industry.title} automation India, ${industry.title} solutions Tamil Nadu`}
+        faqs={[
+          {
+            question: `How does Astute Computer help the ${industry.title.toLowerCase()} industry?`,
+            answer: industry.heroDescription,
+          },
+          {
+            question: `Is Astute Computer's ${industry.title.toLowerCase()} solution available in Chennai?`,
+            answer: `Yes. Our ${industry.title.toLowerCase()} digital transformation solutions are available across Chennai, Tamil Nadu, and pan-India. We offer on-site consultations at our Padi office and remote delivery.`,
+          },
+          {
+            question: `What problems does Astute Computer solve for ${industry.title.toLowerCase()} organisations?`,
+            answer: industry.problems.map(p => p.title).join(', ') + '. We address each with tailored digital solutions.',
+          },
+        ]}
       />
 
       <div className="min-h-screen bg-background">

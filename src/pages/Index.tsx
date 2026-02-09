@@ -11,7 +11,6 @@ import { StatsBento } from '@/components/StatsBento';
 import { HowWeWork } from '@/components/HowWeWork';
 import { OfferingsSection } from '@/components/OfferingsSection';
 import { Portfolio } from '@/components/Portfolio';
-import { BlogSection } from '@/components/BlogSection';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
@@ -31,8 +30,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Astute Computer | Digital Transformation & Software Solutions"
-        description="Transform your business with Astute Computer. We offer digital branding, operations digitalization, AI-powered document archives, and custom software development."
+        title="Astute Computer | Digital Transformation & Software Solutions in Chennai"
+        description="Astute Computer is a Chennai-based software consultancy specialising in digital transformation, AI-powered document digitization, operations automation, and custom software development for healthcare, legal, manufacturing, finance, and retail industries."
         canonical="https://astutecomputer.com/"
         type="website"
       />
@@ -56,7 +55,6 @@ const Index = () => {
             <HowWeWork />
             <OfferingsSection />
             <Portfolio />
-            <BlogSection />
             <Contact />
           </div>
         </main>

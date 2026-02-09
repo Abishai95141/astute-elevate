@@ -47,7 +47,7 @@ export function OfferingsSection() {
   }, []);
 
   return (
-    <section className="relative" style={sectionStyle}>
+    <section id="offerings" className="relative" style={sectionStyle}>
       <div className="container-custom px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32">
         <div className="flex flex-col md:grid md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr] xl:grid-cols-[350px_1fr] gap-8 md:gap-12 lg:gap-16 xl:gap-24">
           {/* Left - Sticky Title */}

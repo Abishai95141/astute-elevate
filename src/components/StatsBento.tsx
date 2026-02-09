@@ -67,20 +67,20 @@ export function StatsBento() {
 
           {/* Right column — two stacked cards */}
           <div className="flex flex-col gap-4 sm:gap-5 lg:gap-6">
-            {/* 100% Compliance Stat */}
+            {/* Industry digitization stat */}
             <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 flex-1 flex flex-col justify-center">
               <p className="text-sm text-muted-foreground mb-3">
-                Balanced scorecard approach to track and achieve critical OKRs and KPIs
+                Businesses that digitize operations see measurable improvements in efficiency and output
               </p>
               <div className="flex items-baseline gap-1">
                 <Counter
-                  value={100}
+                  value={70}
                   className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground"
                 />
                 <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">%</span>
               </div>
               <p className="text-lg sm:text-xl font-bold text-foreground mt-2">
-                Alignment to Compliance
+                Faster Document Retrieval
               </p>
             </div>
 
@@ -97,56 +97,56 @@ export function StatsBento() {
 
           {/* ── Row 2 — Three stat cards ── */}
 
-          {/* 40% Time Reduction */}
+          {/* Industry AI adoption stat */}
           <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
             <div className="flex items-baseline gap-1 mb-4">
               <Counter
-                value={40}
+                value={80}
                 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground"
               />
               <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">%</span>
             </div>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4">
-              time reduction in Digital Setup
+              of enterprises are investing in AI
             </p>
             <p className="text-sm text-muted-foreground">
-              AI-accelerated capabilities for setup and world-class automation solutions
+              Digital transformation is no longer optional — it's the standard for staying competitive
             </p>
           </div>
 
-          {/* 20+ Satisfied Clients */}
+          {/* Paper-to-digital stat */}
           <div className="bg-primary rounded-2xl p-6 sm:p-8 text-primary-foreground relative overflow-hidden">
             <div className="absolute right-0 top-0 w-2 h-full bg-gradient-to-b from-primary-foreground/20 to-transparent" />
             <div className="flex items-baseline gap-1 mb-2">
               <Counter
-                value={20}
-                className="text-4xl sm:text-5xl md:text-6xl font-bold"
-              />
-              <span className="text-4xl sm:text-5xl md:text-6xl font-bold">+</span>
-            </div>
-            <p className="text-xs uppercase tracking-wider font-medium opacity-90">
-              Satisfied Clients
-            </p>
-            <p className="text-xs uppercase tracking-wider opacity-70">
-              Trust Our Solutions
-            </p>
-          </div>
-
-          {/* 70% Tech-Driven Results */}
-          <div className="bg-primary rounded-2xl p-6 sm:p-8 text-primary-foreground relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-2 h-full bg-gradient-to-b from-primary-foreground/20 to-transparent" />
-            <div className="flex items-baseline gap-1 mb-2">
-              <Counter
-                value={70}
+                value={90}
                 className="text-4xl sm:text-5xl md:text-6xl font-bold"
               />
               <span className="text-4xl sm:text-5xl md:text-6xl font-bold">%</span>
             </div>
             <p className="text-xs uppercase tracking-wider font-medium opacity-90">
-              Tech-Driven Results
+              Of Business Data
             </p>
             <p className="text-xs uppercase tracking-wider opacity-70">
-              Powering Growth
+              Is Still Unstructured
+            </p>
+          </div>
+
+          {/* Cost reduction industry stat */}
+          <div className="bg-primary rounded-2xl p-6 sm:p-8 text-primary-foreground relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-2 h-full bg-gradient-to-b from-primary-foreground/20 to-transparent" />
+            <div className="flex items-baseline gap-1 mb-2">
+              <Counter
+                value={40}
+                className="text-4xl sm:text-5xl md:text-6xl font-bold"
+              />
+              <span className="text-4xl sm:text-5xl md:text-6xl font-bold">%</span>
+            </div>
+            <p className="text-xs uppercase tracking-wider font-medium opacity-90">
+              Cost Savings Possible
+            </p>
+            <p className="text-xs uppercase tracking-wider opacity-70">
+              Through Automation
             </p>
           </div>
 

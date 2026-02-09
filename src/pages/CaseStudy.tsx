@@ -140,6 +140,9 @@ export default function CaseStudy() {
         canonical={`https://astutecomputer.com/case-studies/${caseStudy.slug}`}
         type="article"
         image={caseStudy.thumbnail_url || undefined}
+        publishedTime={caseStudy.published_at || caseStudy.created_at}
+        modifiedTime={caseStudy.updated_at}
+        keywords={`${(caseStudy as any).industry || ''} case study, ${relatedServices.join(', ')}, digital transformation example, ${(caseStudy as any).industry || ''} digitization Chennai`.trim()}
       />
       <Helmet>
         <script type="application/ld+json">

@@ -63,13 +63,26 @@ export default function CaseStudiesHub() {
     { name: 'Case Studies', url: `${siteConfig.url}/case-studies` },
   ]);
 
+  const caseStudyFAQs = [
+    {
+      question: 'What kind of case studies does Astute Computer publish?',
+      answer: 'We publish real-world case studies across healthcare, legal, manufacturing, finance, retail, and education industries — covering document digitization, AI automation, custom software development, and full digital transformation projects.',
+    },
+    {
+      question: 'Can I filter case studies by industry or service?',
+      answer: 'Yes. Our case studies hub lets you filter by industry (Healthcare, Legal, Manufacturing, Fintech, Retail, Education) and by service type (Document Digitization, AI Automation, Custom Software, Digital Transformation).',
+    },
+  ];
+
   return (
     <>
       <SEOHead
-        title="Case Studies | Astute Computer"
-        description="Explore our portfolio of successful digital transformation projects. See how we've helped businesses across industries achieve measurable results with AI, automation, and custom software."
+        title="Case Studies | Digital Transformation Projects by Astute Computer"
+        description="Explore real-world digital transformation case studies from Astute Computer. See how businesses in healthcare, legal, manufacturing, and retail modernized operations with AI document digitization, automation, and custom software."
         canonical="https://astutecomputer.com/case-studies"
         type="website"
+        keywords="digital transformation case studies, document digitization examples, AI automation projects India, custom software case study Chennai, healthcare digitization, legal document management"
+        faqs={caseStudyFAQs}
       />
       <Helmet>
         <script type="application/ld+json">
@@ -107,9 +120,9 @@ export default function CaseStudiesHub() {
                     Case Studies
                   </h1>
                   <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
-                    Real results from real projects. Explore how we've helped businesses
-                    transform their operations, digitize their workflows, and achieve
-                    measurable growth.
+                    See how businesses across industries are tackling digital
+                    transformation — from legacy modernization and document
+                    digitization to AI-powered automation.
                   </p>
                 </motion.div>
                 
@@ -121,16 +134,16 @@ export default function CaseStudiesHub() {
                   className="flex gap-8 sm:gap-12"
                 >
                   <div className="text-center">
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">50+</div>
-                    <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-wider">Projects</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">15+</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">5+</div>
                     <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-wider">Industries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">95%</div>
-                    <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-wider">Success Rate</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">4</div>
+                    <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-wider">Service Lines</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">End‑to‑End</div>
+                    <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-wider">Delivery</div>
                   </div>
                 </motion.div>
               </div>

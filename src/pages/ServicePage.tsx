@@ -94,6 +94,7 @@ export default function ServicePage() {
     '@type': 'Service',
     name: service.title,
     description: service.short_description,
+    url: `${siteConfig.url}/services/${service.slug}`,
     provider: {
       '@type': 'Organization',
       name: siteConfig.name,
@@ -103,16 +104,40 @@ export default function ServicePage() {
     areaServed: [
       { '@type': 'City', name: 'Chennai' },
       { '@type': 'State', name: 'Tamil Nadu' },
+      { '@type': 'Country', name: 'India' },
     ],
+    offers: {
+      '@type': 'Offer',
+      availability: 'https://schema.org/InStock',
+      priceCurrency: 'INR',
+    },
   };
+
+  // Dynamic FAQ schema for service page
+  const serviceFAQs = [
+    {
+      question: `What is ${service.title} by Astute Computer?`,
+      answer: service.short_description || `${service.title} is one of our core service offerings designed to help businesses modernize and grow.`,
+    },
+    {
+      question: `Is ${service.title} available in Chennai?`,
+      answer: `Yes. Our ${service.title.toLowerCase()} services are available across Chennai, Tamil Nadu, and pan-India. Visit our Padi office for in-person consultations or connect with us remotely.`,
+    },
+    {
+      question: `How do I get started with ${service.title}?`,
+      answer: `Contact us at +91-8667331224 or fill out our contact form to schedule a free consultation. We will assess your requirements and propose a tailored solution.`,
+    },
+  ];
 
   return (
     <>
       <SEOHead
-        title={service.meta_title || `${service.title} | Astute Computer`}
+        title={service.meta_title || `${service.title} Services in Chennai | Astute Computer`}
         description={service.meta_description || service.short_description}
         canonical={`https://astutecomputer.com/services/${service.slug}`}
         type="website"
+        keywords={`${service.title} Chennai, ${service.title} Tamil Nadu, ${service.title} India, ${service.title} services, Astute Computer ${service.title}`}
+        faqs={serviceFAQs}
       />
       <Helmet>
         <script type="application/ld+json">

@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
 import { ScrollToTop } from "./components/ScrollToTop";
-import { SmoothScroll } from "./components/SmoothScroll";
 import { PerformanceProvider } from "./hooks/usePerformance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -41,37 +40,35 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <PerformanceProvider>
           <TooltipProvider>
-            <SmoothScroll>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <ScrollToTop />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/case-studies" element={<CaseStudiesHub />} />
-                  <Route path="/case-studies/:slug" element={<CaseStudy />} />
-                  <Route path="/services/:slug" element={<ServicePage />} />
-                  <Route path="/industries/:slug" element={<IndustryPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/case-studies" element={<CaseStudiesHub />} />
+                <Route path="/case-studies/:slug" element={<CaseStudy />} />
+                <Route path="/services/:slug" element={<ServicePage />} />
+                <Route path="/industries/:slug" element={<IndustryPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
 
-                  {/* Location Pages - Local SEO */}
-                  <Route path="/chennai" element={<ChennaiPage />} />
-                  <Route path="/chennai/:neighborhood" element={<NeighborhoodPage />} />
+                {/* Location Pages - Local SEO */}
+                <Route path="/chennai" element={<ChennaiPage />} />
+                <Route path="/chennai/:neighborhood" element={<NeighborhoodPage />} />
 
-                  {/* Admin Routes */}
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/messages" element={<ContactMessages />} />
-                  <Route path="/admin/subscribers" element={<NewsletterSubscribers />} />
-                  <Route path="/admin/case-studies" element={<CaseStudies />} />
-                  <Route path="/admin/case-studies/:id" element={<CaseStudyEdit />} />
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/messages" element={<ContactMessages />} />
+                <Route path="/admin/subscribers" element={<NewsletterSubscribers />} />
+                <Route path="/admin/case-studies" element={<CaseStudies />} />
+                <Route path="/admin/case-studies/:id" element={<CaseStudyEdit />} />
 
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </SmoothScroll>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
           </TooltipProvider>
         </PerformanceProvider>
       </QueryClientProvider>
