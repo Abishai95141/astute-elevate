@@ -2,7 +2,7 @@ import { BlurFade } from '@/components/ui/BlurFade';
 import { ArrowRight, Sparkles, Cpu, TrendingUp, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TiltedCard from '@/components/ui/TiltedCard';
-import indiaGateImg from '@/assets/sections/india-gate.jpg';
+import digitalTransformationImg from '@/assets/sections/digital-transformation.jpg';
 
 const highlights = [
   { icon: FileText, label: 'Document Digitization' },
@@ -29,7 +29,7 @@ export function CoreMission() {
               
               {/* Main image with TiltedCard */}
               <TiltedCard
-                imageSrc={indiaGateImg}
+                imageSrc={digitalTransformationImg}
                 altText="Digital transformation in India"
                 containerHeight="350px"
                 containerWidth="100%"
