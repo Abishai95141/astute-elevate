@@ -24,12 +24,15 @@ export function About() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardSize, setCardSize] = useState({ w: 500, h: 380 });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const measure = () => {
       if (!containerRef.current) return;
       const containerW = containerRef.current.offsetWidth;
-      const w = Math.min(containerW * 0.85, 600);
+      const mobile = containerW < 640;
+      setIsMobile(mobile);
+      const w = mobile ? Math.min(containerW * 0.7, 320) : Math.min(containerW * 0.85, 600);
       const h = w * 0.75;
       setCardSize({ w, h });
     };
@@ -114,11 +117,11 @@ export function About() {
             <CardSwap
               width={cardSize.w}
               height={cardSize.h}
-              cardDistance={40}
-              verticalDistance={45}
+              cardDistance={isMobile ? 20 : 40}
+              verticalDistance={isMobile ? 25 : 45}
               delay={2500}
               pauseOnHover={true}
-              skewAmount={3}
+              skewAmount={isMobile ? 1.5 : 3}
               easing="elastic"
             >
               {cardImages.map((card) => (
