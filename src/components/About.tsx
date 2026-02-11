@@ -1,169 +1,146 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Target, Lightbulb, Users, Zap, Shield, Clock, ArrowRight } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { useInView } from 'framer-motion';
 import { BlurFade } from '@/components/ui/BlurFade';
-import { Counter } from '@/components/ui/Counter';
+import CardSwap, { Card } from '@/components/ui/CardSwap';
 
-const features = [
-  {
-    icon: Target,
-    title: 'Precision',
-    description: 'Every line of code, every pixel, every decision is made with purpose and accuracy.',
-    accent: 'from-blue-500 to-cyan-400',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Innovation',
-    description: 'We push boundaries and embrace cutting-edge technologies to deliver modern solutions.',
-    accent: 'from-amber-400 to-orange-500',
-  },
-  {
-    icon: Users,
-    title: 'Partnership',
-    description: 'Your success is our success. We grow together as true partners in your journey.',
-    accent: 'from-emerald-400 to-teal-500',
-  },
-  {
-    icon: Zap,
-    title: 'Impact',
-    description: 'We deliver solutions that make a measurable difference to your bottom line.',
-    accent: 'from-violet-400 to-purple-500',
-  },
-  {
-    icon: Shield,
-    title: 'Security',
-    description: 'Enterprise-grade security measures to protect your data and operations.',
-    accent: 'from-rose-400 to-pink-500',
-  },
-  {
-    icon: Clock,
-    title: 'Reliability',
-    description: '99.9% uptime guarantee with 24/7 monitoring and rapid response times.',
-    accent: 'from-sky-400 to-blue-500',
-  },
-];
+import precisionImg from '@/assets/sections/about-precision.jpg';
+import innovationImg from '@/assets/sections/about-innovation.jpg';
+import partnershipImg from '@/assets/sections/about-partnership.jpg';
+import impactImg from '@/assets/sections/about-impact.jpg';
+import securityImg from '@/assets/sections/about-security.jpg';
+import reliabilityImg from '@/assets/sections/about-reliability.jpg';
 
-const stats = [
-  { value: 4, suffix: '+', label: 'Industries Served' },
-  { value: 3, suffix: '+', label: 'Years in Business' },
-  { value: 10, suffix: '+', label: 'Solutions Deployed' },
-  { value: 24, suffix: '/7', label: 'Support Available' },
+const cardImages = [
+  { title: 'Precision', brief: 'Every decision made with purpose and accuracy — from code to delivery.', image: precisionImg },
+  { title: 'Innovation', brief: 'Embracing cutting-edge technologies to build modern, future-ready solutions.', image: innovationImg },
+  { title: 'Partnership', brief: 'Your success is our success. We grow together as true partners.', image: partnershipImg },
+  { title: 'Impact', brief: 'Solutions that make a measurable difference to your bottom line.', image: impactImg },
+  { title: 'Security', brief: 'Enterprise-grade measures to protect your data and operations.', image: securityImg },
+  { title: 'Reliability', brief: '99.9% uptime with 24/7 monitoring and rapid response times.', image: reliabilityImg },
 ];
 
 export function About() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [cardSize, setCardSize] = useState({ w: 500, h: 380 });
+
+  useEffect(() => {
+    const measure = () => {
+      if (!containerRef.current) return;
+      const containerW = containerRef.current.offsetWidth;
+      const w = Math.min(containerW * 0.85, 600);
+      const h = w * 0.75;
+      setCardSize({ w, h });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
 
   return (
-    <section id="about" className="relative overflow-hidden py-20 sm:py-24 md:py-32">
+    <section id="about" className="relative overflow-hidden py-20 sm:py-28 md:py-36">
       <div className="absolute inset-0 grid-pattern opacity-10" />
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[150px]" />
       <div className="absolute top-20 left-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[120px]" />
 
       <div ref={ref} className="container-custom relative z-10 px-6 sm:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-14 sm:mb-20">
-          <BlurFade>
-            <span className="inline-block text-xs sm:text-sm uppercase tracking-widest text-primary mb-3 sm:mb-4">
-              Why Partner With Us
-            </span>
-          </BlurFade>
+
+        {/* About Us Content — TOP */}
+        <div className="max-w-3xl mx-auto mb-24 sm:mb-32 lg:mb-40">
           <BlurFade delay={0.1}>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-5 sm:mb-6 leading-[1.15]">
-              We Build Digital
+            <div className="flex items-center gap-3 mb-5 justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-primary font-semibold">
+                About Us
+              </span>
+            </div>
+          </BlurFade>
+
+          <BlurFade delay={0.15}>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-8 sm:mb-10 text-center leading-[1.15]">
+              Built on Trust.
               <br />
-              <span className="text-gradient-purple">Excellence</span>
+              <span className="text-gradient-purple">Driven by Innovation.</span>
             </h2>
           </BlurFade>
-          <BlurFade delay={0.2}>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Astute Computer is a software consultancy dedicated to helping businesses modernize their operations through innovative digital solutions.
-            </p>
-          </BlurFade>
-        </div>
 
-        {/* Stats Row — inline above the bento grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-10 sm:mb-14">
-          {stats.map((stat, index) => (
-            <BlurFade key={stat.label} delay={0.08 * index}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-sm p-5 sm:p-6 text-center group hover:border-primary/30 transition-colors duration-300"
-              >
-                {/* Subtle gradient glow on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-1">
-                    <Counter value={stat.value} suffix={stat.suffix} />
-                  </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
-                </div>
-              </motion.div>
+          <div className="space-y-5 text-base sm:text-lg text-muted-foreground leading-relaxed">
+            <BlurFade delay={0.2}>
+              <p>
+                Astute Computer is a technology-driven firm built on over <span className="text-foreground font-medium">26 years of trusted service</span> and long-standing customer relationships. What began as a reliable computer solutions business has now evolved into a forward-thinking software and AI solutions company.
+              </p>
             </BlurFade>
-          ))}
+
+            <BlurFade delay={0.25}>
+              <p>
+                We combine legacy trust with modern innovation — helping businesses transition from traditional operations to intelligent digital systems.
+              </p>
+            </BlurFade>
+
+            <BlurFade delay={0.3}>
+              <p className="text-foreground font-medium">
+                Our focus is simple: Build practical, scalable, and high-impact technology solutions that solve real business problems.
+              </p>
+            </BlurFade>
+
+            <BlurFade delay={0.35}>
+              <p>
+                From custom software development and AI automations to enterprise systems and IT consulting, we work closely with our clients to understand their workflows, identify inefficiencies, and implement smart solutions that drive measurable growth.
+              </p>
+            </BlurFade>
+
+            <BlurFade delay={0.4}>
+              <p>
+                At Astute Computer, we believe technology should not complicate business — it should <span className="text-foreground font-medium">simplify and strengthen it</span>.
+              </p>
+            </BlurFade>
+
+            <BlurFade delay={0.45}>
+              <p className="text-foreground font-semibold text-lg sm:text-xl pt-2">
+                Backed by experience. Driven by innovation. Built for the future.
+              </p>
+            </BlurFade>
+          </div>
         </div>
 
-        {/* Bento Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {features.map((feature, index) => {
-            // First and last cards span 2 cols on large screens for visual variety
-            const isWide = index === 0 || index === 5;
-            return (
-              <BlurFade
-                key={feature.title}
-                delay={0.06 * index}
-                className={isWide ? 'sm:col-span-2 lg:col-span-2' : ''}
-              >
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="group relative h-full overflow-hidden rounded-2xl border border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card transition-all duration-300"
-                >
-                  {/* Accent gradient bar at top */}
-                  <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${feature.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-                  <div className={`relative z-10 p-6 sm:p-7 flex ${isWide ? 'flex-col sm:flex-row sm:items-center sm:gap-6' : 'flex-col'}`}>
-                    {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.accent} flex items-center justify-center shadow-lg mb-4 ${isWide ? 'sm:mb-0 sm:flex-shrink-0' : ''}`}>
-                      <feature.icon className="w-6 h-6 text-white" />
-                    </div>
-
-                    <div className="flex-1">
-                      <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
-                        {feature.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </div>
-
-                    {/* Arrow that slides in on hover */}
-                    <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                      <ArrowRight className="w-4 h-4 text-primary" />
+        {/* Card Swap — BOTTOM */}
+        <BlurFade delay={0.5}>
+          <div
+            ref={containerRef}
+            className="flex items-center justify-center mt-16 sm:mt-20 lg:mt-28"
+            style={{ height: cardSize.h + 120 }}
+          >
+            <CardSwap
+              width={cardSize.w}
+              height={cardSize.h}
+              cardDistance={40}
+              verticalDistance={45}
+              delay={2500}
+              pauseOnHover={true}
+              skewAmount={3}
+              easing="elastic"
+            >
+              {cardImages.map((card) => (
+                <Card key={card.title}>
+                  <div className="relative w-full h-full">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+                      <h4 className="text-white font-bold text-xl sm:text-2xl mb-1">{card.title}</h4>
+                      <p className="text-white/70 text-sm sm:text-base leading-snug">{card.brief}</p>
                     </div>
                   </div>
-                </motion.div>
-              </BlurFade>
-            );
-          })}
-        </div>
-
-        {/* Bottom CTA strip */}
-        <BlurFade delay={0.5}>
-          <div className="mt-14 sm:mt-20 text-center">
-            <p className="text-muted-foreground text-sm sm:text-base mb-5">
-              Ready to modernize your operations?
-            </p>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-blue-500 text-white font-medium text-sm sm:text-base hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
-            >
-              Let's Talk
-              <ArrowRight className="w-4 h-4" />
-            </a>
+                </Card>
+              ))}
+            </CardSwap>
           </div>
         </BlurFade>
+
       </div>
     </section>
   );
