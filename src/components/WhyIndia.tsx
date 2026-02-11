@@ -1,6 +1,12 @@
 import { Counter } from '@/components/ui/Counter';
-import { Stethoscope, Scale, Factory, TrendingUp, ShoppingCart } from 'lucide-react';
 import { BlurFade } from '@/components/ui/BlurFade';
+import FlowingMenu from '@/components/ui/FlowingMenu';
+
+import healthcareImg from '@/assets/sections/industry-healthcare.jpg';
+import legalImg from '@/assets/sections/industry-legal.jpg';
+import manufacturingImg from '@/assets/sections/industry-manufacturing.jpg';
+import financeImg from '@/assets/sections/industry-finance.jpg';
+import retailImg from '@/assets/sections/industry-retail.jpg';
 
 const stats = [
   { 
@@ -26,42 +32,12 @@ const stats = [
   },
 ];
 
-const industries = [
-  {
-    icon: Stethoscope,
-    title: 'Healthcare',
-    problem: 'Legacy systems & paper records',
-    description: 'Outdated patient management, compliance burdens, and fragmented data across departments.',
-    accent: 'from-emerald-400 to-cyan-500',
-  },
-  {
-    icon: Scale,
-    title: 'Legal',
-    problem: 'Document chaos & slow retrieval',
-    description: 'Hours wasted searching through case files, security vulnerabilities, and version control nightmares.',
-    accent: 'from-amber-400 to-orange-500',
-  },
-  {
-    icon: Factory,
-    title: 'Manufacturing',
-    problem: 'Outdated processes & manual tracking',
-    description: 'Excel-based inventory, disconnected supply chains, and no real-time visibility.',
-    accent: 'from-blue-400 to-indigo-500',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Finance',
-    problem: 'Data silos & reporting delays',
-    description: 'Spreadsheet hell, compliance risks, and days-long report generation cycles.',
-    accent: 'from-violet-400 to-purple-500',
-  },
-  {
-    icon: ShoppingCart,
-    title: 'Retail',
-    problem: 'Inventory chaos & channel disconnect',
-    description: 'Stock mismatches, poor omnichannel experiences, and lost sales opportunities.',
-    accent: 'from-rose-400 to-pink-500',
-  },
+const industryMenuItems = [
+  { link: '/industries/healthcare', text: 'Healthcare', image: healthcareImg },
+  { link: '/industries/legal', text: 'Legal', image: legalImg },
+  { link: '/industries/manufacturing', text: 'Manufacturing', image: manufacturingImg },
+  { link: '/industries/finance', text: 'Finance', image: financeImg },
+  { link: '/industries/retail', text: 'Retail', image: retailImg },
 ];
 
 export function WhyIndia() {
@@ -174,29 +150,20 @@ export function WhyIndia() {
         {/* Divider */}
         <div className="w-full h-px bg-gray-300 mb-10 sm:mb-12 lg:mb-14" />
 
-        {/* Bottom: Industry Challenge Cards - Full width grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5">
-          {industries.map((industry, index) => (
-            <BlurFade key={industry.title} delay={0.05 * index}>
-              <div className="group flex flex-col gap-3 p-5 sm:p-6 rounded-2xl bg-white/70 hover:bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full">
-                <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${industry.accent} flex items-center justify-center shadow-sm`}>
-                  <industry.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 mb-1">
-                    {industry.title}
-                  </h4>
-                  <p className="text-xs font-semibold text-blue-600 mb-1.5">
-                    {industry.problem}
-                  </p>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    {industry.description}
-                  </p>
-                </div>
-              </div>
-            </BlurFade>
-          ))}
-        </div>
+        {/* Bottom: Flowing Industry Menu */}
+        <BlurFade delay={0.1}>
+          <div className="rounded-2xl overflow-hidden">
+            <FlowingMenu
+              items={industryMenuItems}
+              speed={12}
+              textColor="#1a1a2e"
+              bgColor="#ffffff"
+              marqueeBgColor="#1a1f3c"
+              marqueeTextColor="#ffffff"
+              borderColor="#e5e7eb"
+            />
+          </div>
+        </BlurFade>
 
       </div>
     </section>
