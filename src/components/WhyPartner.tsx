@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Sparkles, Shield, Users, Zap } from 'lucide-react';
 import businessImg from '@/assets/sections/why-partner-business.jpg';
-import indiaImg from '@/assets/sections/why-partner-india.jpg';
+import localExpertiseImg from '@/assets/sections/local-expertise.jpg';
 import skyscrapersImg from '@/assets/sections/skyscrapers.jpg';
 import aiImg from '@/assets/sections/ai-innovation.jpg';
 
@@ -25,7 +25,7 @@ const features = [
     icon: Users,
     title: 'Local Market Expertise',
     description: 'Deep understanding of Chennai\'s business landscape and talent pool.',
-    image: indiaImg,
+    image: localExpertiseImg,
   },
   {
     id: 'partner',
