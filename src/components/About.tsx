@@ -32,7 +32,7 @@ export function About() {
       const containerW = containerRef.current.offsetWidth;
       const mobile = containerW < 640;
       setIsMobile(mobile);
-      const w = mobile ? Math.min(containerW * 0.7, 320) : Math.min(containerW * 0.85, 600);
+      const w = mobile ? Math.min(containerW * 0.65, 300) : Math.min(containerW * 0.85, 600);
       const h = w * 0.75;
       setCardSize({ w, h });
     };
@@ -40,6 +40,12 @@ export function About() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+
+  // Total stack height needs to account for the vertical spread of all 6 cards
+  const stackCount = cardImages.length;
+  const vDist = isMobile ? 20 : 45;
+  const cDist = isMobile ? 15 : 40;
+  const totalStackHeight = cardSize.h + (stackCount - 1) * vDist + 80;
 
   return (
     <section id="about" className="relative overflow-hidden py-20 sm:py-28 md:py-36">
@@ -50,7 +56,7 @@ export function About() {
       <div ref={ref} className="container-custom relative z-10 px-6 sm:px-8">
 
         {/* About Us Content — TOP */}
-        <div className="max-w-3xl mx-auto mb-24 sm:mb-32 lg:mb-40">
+        <div className="max-w-3xl mx-auto">
           <BlurFade delay={0.1}>
             <div className="flex items-center gap-3 mb-5 justify-center">
               <div className="w-2.5 h-2.5 rounded-full bg-primary" />
@@ -71,7 +77,7 @@ export function About() {
           <div className="space-y-5 text-base sm:text-lg text-muted-foreground leading-relaxed">
             <BlurFade delay={0.2}>
               <p>
-                Astute Computer is a technology-driven firm built on over <span className="text-foreground font-medium">26 years of trusted service</span> and long-standing customer relationships. What began as a reliable computer solutions business has now evolved into a forward-thinking software and AI solutions company.
+                Astute Computer is a technology-driven firm built on over <span className="text-foreground font-medium">26 years of trusted service</span> and long-standing customer relationships. What began as a reliable computer and printer service business has now evolved into a forward-thinking software and AI solutions company.
               </p>
             </BlurFade>
 
@@ -111,14 +117,14 @@ export function About() {
         <BlurFade delay={0.5}>
           <div
             ref={containerRef}
-            className="flex items-center justify-center mt-16 sm:mt-20 lg:mt-28"
-            style={{ height: cardSize.h + 120 }}
+            className="flex items-center justify-center mt-32 sm:mt-40 lg:mt-48"
+            style={{ height: totalStackHeight }}
           >
             <CardSwap
               width={cardSize.w}
               height={cardSize.h}
-              cardDistance={isMobile ? 20 : 40}
-              verticalDistance={isMobile ? 25 : 45}
+              cardDistance={cDist}
+              verticalDistance={vDist}
               delay={2500}
               pauseOnHover={true}
               skewAmount={isMobile ? 1.5 : 3}
