@@ -3,7 +3,7 @@ import { Sparkles, Shield, Users, Zap } from 'lucide-react';
 import businessImg from '@/assets/sections/why-partner-business.jpg';
 import indiaImg from '@/assets/sections/why-partner-india.jpg';
 import skyscrapersImg from '@/assets/sections/skyscrapers.jpg';
-import aiImg from '@/assets/sections/ai-purple-abstract.jpg';
+import aiImg from '@/assets/sections/ai-innovation.jpg';
 
 const features = [
   {
